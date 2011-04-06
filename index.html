@@ -4,61 +4,22 @@
   <meta charset="UTF-8">
   <title>redis.io</title>
   
-  <style type="text/css">
-    body {
-      margin: 0;
-      font-family: Monaco, Menlo, monospace;
-      font-size: 12px;
-      background: #f8f8f8;
-    }
-    a {
-      color: #444;
-      text-decoration: none;
-    }
-    section#results {
-      margin: 10px;
-    }
-    ul#results {
-      list-style: none;
-      padding: 0;
-    }
-    ul#results li {
-      margin: 0 0 10px;
-    }
-    ul#results li a, a#all {
-      color: #06A;
-      background: #fff;
-      display: block;
-      padding: 10px;
-      border-radius: 5px;
-      text-shadow: 1px 1px 0 #f0f0f0;
-      box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
-    }
-    ul#results li a:hover, a.all:hover {
-      color: #09f;
-    }
-    header#main-header {
-      background-image: -webkit-gradient(linear,left bottom,left top,color-stop(1, rgb(55,55,55)), color-stop(0, rgb(0,0,0)));
-      padding: 10px;
-      margin: 0 0 16px;
-      color: #fff;
-      box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
-    }
-    header#main-header h1 {
-      margin: 0;
-      font-family: Helvetica, Arial, sans-serif;
-    }
-  </style>
-  <script src="deps/underscore.js"></script>
-  <script src="deps/backbone.js"></script>
-  <script src="deps/jquery.js"></script>
+  <link href="favicon.png" rel="shortcut icon" />  
+  <link rel="stylesheet" type="text/css" href="styles.css" media="all" />
+
+  <script src="scripts/deps/underscore.js"></script>
+  <script src="scripts/deps/backbone.js"></script>
+  <script src="scripts/deps/jquery.js"></script>
   <script src="socket.io/socket.io.js"></script>
+  
   <script src="main.js"></script>
 </head>
 <body>
-  <header id="main-header"><h1>redis.io</h1></header>
+  <header id="main-header">
+    <!-- input type="text" id="command" placeholder="redis>" / -->
+    <h1><a href="http://redis.io/" title="redis.io" target="_blank"><img src="redis-logo.png" alt="redis.io" /></a></h1>
+  </header>
   <section id="results">
-    <a href="#" id="all">[all keys]</a>
     <ul id="results"></ul>
   </section>
 </body>
