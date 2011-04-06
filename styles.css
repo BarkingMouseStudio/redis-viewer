@@ -54,8 +54,8 @@ ul#results li {
 ul#results li a {
   text-shadow: 1px 1px 0 #f0f0f0;
 }
-ul#results li span {
-  margin: 0 5px;
+ul#results li span,
+ul#results li div {
   font-size: 10px;
   color: #555;
 }

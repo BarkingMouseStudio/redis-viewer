@@ -3,20 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <title>redis.io</title>
-  
-  <link href="favicon.png" rel="shortcut icon" />  
+
+  <link href="favicon.png" rel="shortcut icon" />
   <link rel="stylesheet" type="text/css" href="styles.css" media="all" />
 
   <script src="scripts/deps/underscore.js"></script>
-  <script src="scripts/deps/backbone.js"></script>
   <script src="scripts/deps/jquery.js"></script>
   <script src="socket.io/socket.io.js"></script>
-  
+
   <script src="main.js"></script>
+
+  <script type="text/template" id="key-template">
+    <li><a href="#<%= command %> <%= reply %>"><%= reply %></a> <span><%= type %></span> <a href='#DEL <%= reply %>'>[DEL]</a></li>
+  </script>
+  <script type="text/template" id="string-template">
+    <li>
+      <div><%= reply %></div>
+      <br />
+      <a href='#KEYS *'>[KEYS *]</a>
+    </li>
+  </script>
+  <script type="text/template" id="hash-template">
+    <li>
+      <% _.each(reply, function(val, key) { %>
+        <div><strong><%= key %>:</strong> <%= val %></div>
+      <% }); %>
+      <br />
+      <a href='#KEYS *'>[KEYS *]</a>
+    </li>
+  </script>
 </head>
 <body>
   <header id="main-header">
-    <!-- input type="text" id="command" placeholder="redis>" / -->
+    <input type="text" id="command" placeholder="redis>" />
     <h1><a href="http://redis.io/" title="redis.io" target="_blank"><img src="redis-logo.png" alt="redis.io" /></a></h1>
   </header>
   <section id="results">

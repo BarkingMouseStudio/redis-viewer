@@ -2,12 +2,13 @@ express = require('express')
 redis   = require('redis')
 io      = require('socket.io')
 _ = require('underscore')
+commands = require('./commands')
 
 redis_client = redis.createClient()
 
 redis_client.on 'error', (error) ->
   console.log error
-  
+
 app = express.createServer()
 app.use(express.static(__dirname))
 app.use(express.logger({ 'format': ':method :url' }))
@@ -17,35 +18,45 @@ console.log('listening on :3000')
 
 socket = io.listen(app)
 
+reply_types =
+  'KEYS': 'keys'
+  'GET': 'string'
+  'HGETALL': 'hash'
+  'DEL': 'string'
+  'SET': 'string'
+  'HSET': 'string'
+  
+command_map =
+  'string': 'GET'
+  'hash': 'HGETALL'
+
 socket.on 'connection', (client) ->
 
   client.on 'message', (message) ->
-    args = message.split(' ')
-    command = args.shift()
+    args = message.match(/(["'])(?:\\\1|.)*?\1|\S+/g)
+    command = args.shift().toUpperCase()
     
-    # redis_client[command](args)
-    
-    switch command.toUpperCase()
-      when 'KEYS'
-        redis_client.KEYS args, (error, keys) ->
-          _.each keys, (key) ->
-            redis_client.type key, (error, type) ->
-              client.send({ key: key, kind: 'key', type: type })
-              return
-            return
+    args = _.map args, (arg) ->
+      return arg.replace(/^(["'])(.*?)\1$/g, '$2')
+
+    return if not command of commands
+
+    redis_client[command] args, (error, reply) ->
+      reply_type = reply_types[command]
+      
+      if command is 'KEYS'
+        _.each reply, (key) ->
+          redis_client.TYPE key, (error, type) ->
+            client.send
+              reply: key
+              type: type
+              command: command_map[type]
+              reply_type: reply_type
           return
-      when 'GET'
-        redis_client.GET args, (error, value) ->
-          client.send({ value: value, kind: 'string' })
-          return
-      when 'HGETALL'
-        redis_client.HGETALL args, (error, value) ->
-          client.send({ value: value, kind: 'hash' })
-          return
-      when 'DEL'
-        redis_client.DEL args, (error, value) ->
-          client.send({ value: value, kind: 'string' })
-          return
-          
+      else
+        client.send
+          reply: reply
+          reply_type: reply_type
+
     return
   return

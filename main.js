@@ -1,49 +1,52 @@
 (function() {
   $(function() {
-    var $command, $results, command, parse_command, socket;
+    var $results, command, command_el, parse_command, send_command, socket, templates;
+    templates = {
+      'keys': _.template(document.getElementById('key-template').innerHTML),
+      'string': _.template(document.getElementById('string-template').innerHTML),
+      'hash': _.template(document.getElementById('hash-template').innerHTML)
+    };
     socket = new io.Socket(location.hostname);
     socket.connect();
     $results = $('ul#results');
+    command_el = document.getElementById('command');
     socket.on('message', function(message) {
-      switch (message.kind) {
-        case 'key':
-          switch (message.type) {
-            case 'string':
-              $results.append("<li>\n  <a href='#GET " + message.key + "'>" + message.key + "</a>\n  <span>" + message.type + "</span>\n  <a href='#DEL " + message.key + "'>[DELETE]</a>\n</li>");
-              break;
-            case 'hash':
-              $results.append("<li>\n  <a href='#HGETALL " + message.key + "'>" + message.key + "</a>\n  <span>" + message.type + "</span>\n  <a href='#DEL " + message.key + "'>[DELETE]</a>\n</li>");
-          }
-          break;
-        case 'hash':
-          $results.append("<li>\n  <span class='value'>" + (JSON.stringify(message.value)) + "</span><a href='#KEYS *'>[VIEW ALL]</a>\n</li>");
-          break;
-        case 'string':
-          $results.append("<li>\n  <span class='value'>" + message.value + "</span><a href='#KEYS *'>[VIEW ALL]</a>\n</li>");
-      }
+      $results.append(templates[message.reply_type](message));
     });
     parse_command = function(href) {
-      var hash_index;
+      var hash, hash_index;
       hash_index = href.indexOf('#');
       if (hash_index === -1) {
         return null;
       }
-      return href.substr(hash_index + 1);
+      hash = href.substr(hash_index + 1);
+      if (hash.length === 0) {
+        return null;
+      }
+      return hash;
+    };
+    send_command = function(command) {
+      $results.empty();
+      if (!command) {
+        command = 'KEYS *';
+      }
+      location.hash = command;
+      command_el.value = command;
+      return socket.send(command);
     };
     $('a').live('click', function(e) {
       var command;
-      $results.empty();
       command = parse_command(e.target.href);
-      socket.send(command);
+      send_command(command);
     });
     command = parse_command(location.href);
-    console.log(command);
-    socket.send(command != null ? command : 'KEYS *');
-    $command = $(document.getElementById('command'));
-    return $command.bind('keypress', function(e) {
-      if (e.keyCode === 13) {
-        location.hash = e.target.value;
+    send_command(command);
+    return command_el.addEventListener('keypress', function(e) {
+      if (e.keyCode !== 13) {
+        return;
       }
+      command = e.target.value;
+      send_command(command);
     });
   });
 }).call(this);

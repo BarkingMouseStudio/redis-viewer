@@ -1,4 +1,4 @@
-{
+module.exports = {
   "APPEND": {
     "summary": "Append a value to a key",
     "arguments": [
