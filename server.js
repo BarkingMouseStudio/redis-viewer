@@ -1,5 +1,5 @@
 (function() {
-  var app, command_map, commands, express, io, redis, redis_client, reply_types, socket, _;
+  var app, command_map, commands, express, format_json, io, redis, redis_client, reply_types, socket, _;
   express = require('express');
   redis = require('redis');
   io = require('socket.io');
@@ -18,7 +18,7 @@
   console.log('listening on :3000');
   socket = io.listen(app);
   reply_types = {
-    'KEYS': 'keys',
+    'KEYS': 'key',
     'GET': 'string',
     'HGETALL': 'hash',
     'DEL': 'string',
@@ -28,6 +28,62 @@
   command_map = {
     'string': 'GET',
     'hash': 'HGETALL'
+  };
+  format_json = function(data, indent) {
+    var closing_brace, html, i, is_array, new_indent;
+    if (indent == null) {
+      indent = '';
+    }
+    if (_.isNumber(data)) {
+      return data;
+    }
+    new_indent = '  ';
+    is_array = _.isArray(data);
+    if (is_array) {
+      if (data.length === 0) {
+        return '[]';
+      } else {
+        closing_brace = ']';
+        html = '[';
+      }
+    } else {
+      if (_.size(data) === 0) {
+        return '{}';
+      } else {
+        closing_brace = '}';
+        html = '{';
+      }
+    }
+    i = 0;
+    _.each(data, function(val, key) {
+      if (i > 0) {
+        html += ', ';
+      }
+      if (is_array) {
+        html += '\n' + indent + new_indent;
+      } else {
+        html += '\n' + indent + new_indent + '<strong>\"' + key + '\":</strong> ';
+      }
+      switch (typeof val) {
+        case 'object':
+          html += format_json(val, indent + new_indent);
+          break;
+        case 'string':
+          html += '\"' + JSON.stringify(val).replace(/^"|"$/g, '').replace(/'/g, "\\'").replace(/\\"/g, '"') + '\"';
+          break;
+        case 'number':
+          html += JSON.stringify(val);
+          break;
+        case 'boolean':
+          html += JSON.stringify(val);
+          break;
+        default:
+          html += '\"' + JSON.stringify(val) + '\"';
+      }
+      return i++;
+    });
+    html += '\n' + indent + closing_brace;
+    return html;
   };
   socket.on('connection', function(client) {
     client.on('message', function(message) {
@@ -41,7 +97,7 @@
         return;
       }
       redis_client[command](args, function(error, reply) {
-        var reply_type;
+        var json_reply, reply_type;
         reply_type = reply_types[command];
         if (command === 'KEYS') {
           return _.each(reply, function(key) {
@@ -55,9 +111,15 @@
             });
           });
         } else {
+          if (reply_type === 'string') {
+            try {
+              json_reply = JSON.parse(reply);
+              reply = format_json(json_reply);
+            } catch (_e) {}
+          }
           return client.send({
             reply: reply,
-            reply_type: reply_type
+            reply_type: reply_type || 'string'
           });
         }
       });

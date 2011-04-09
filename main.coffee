@@ -1,7 +1,7 @@
 $ ->
 
   templates =
-    'keys': _.template(document.getElementById('key-template').innerHTML)
+    'key': _.template(document.getElementById('key-template').innerHTML)
     'string': _.template(document.getElementById('string-template').innerHTML)
     'hash': _.template(document.getElementById('hash-template').innerHTML)
 
@@ -28,7 +28,7 @@ $ ->
     location.hash = command
     command_el.value = command
     socket.send(command)
-    
+
   $('a').live 'click', (e) ->
     command = parse_command(e.target.href)
     send_command(command)
@@ -42,3 +42,4 @@ $ ->
     command = e.target.value
     send_command(command)
     return
+

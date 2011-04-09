@@ -2,7 +2,7 @@
   $(function() {
     var $results, command, command_el, parse_command, send_command, socket, templates;
     templates = {
-      'keys': _.template(document.getElementById('key-template').innerHTML),
+      'key': _.template(document.getElementById('key-template').innerHTML),
       'string': _.template(document.getElementById('string-template').innerHTML),
       'hash': _.template(document.getElementById('hash-template').innerHTML)
     };
