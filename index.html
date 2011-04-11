@@ -5,6 +5,7 @@
   <title>redis.io</title>
 
   <link href="favicon.png" rel="shortcut icon" />
+  
   <link rel="stylesheet" type="text/css" href="styles.css" media="all" />
 
   <script src="scripts/deps/underscore.js"></script>
@@ -14,7 +15,11 @@
   <script src="main.js"></script>
 
   <script type="text/template" id="key-template">
-    <li><a href="#<%= command %> <%= reply %>"><%= reply %></a> <span><%= type %></span> <a href='#DEL <%= reply %>'>[DEL]</a></li>
+    <li>
+      <a href="#<%= command %> <%= reply %><% if (command === 'LRANGE') { %> 0 -1<% } %>"><%= reply %></a>
+      <span><%= type %></span>
+      <a href='#DEL <%= reply %>' class="confirm">[DEL?]</a>
+    </li>
   </script>
   <script type="text/template" id="string-template">
     <li>
@@ -26,9 +31,16 @@
   <script type="text/template" id="hash-template">
     <li>
       <% _.each(reply, function(val, key) { %>
-        <div><strong><%= key %>:</strong> <%= val %></div>
+        <div class="hash-row"><div class="hash-key"><%= key %>:</div> <pre class="hash-val"><%= val %></pre></div>
       <% }); %>
-      <br />
+      <a href='#KEYS *'>[KEYS *]</a>
+    </li>
+  </script>
+  <script type="text/template" id="list-template">
+    <li>
+      <% _.each(reply, function(val, key) { %>
+        <div class="hash-row"><div class="hash-key"><%= key %>:</div> <pre class="hash-val"><%= val %></pre></div>
+      <% }); %>
       <a href='#KEYS *'>[KEYS *]</a>
     </li>
   </script>
@@ -39,6 +51,8 @@
     <h1><a href="http://redis.io/" title="redis.io" target="_blank"><img src="redis-logo.png" alt="redis.io" /></a></h1>
   </header>
   <section id="results">
+    <h2 id="title"></h2>
+    <h3 id="subtitle"></h3>
     <ul id="results"></ul>
   </section>
 </body>

@@ -26,15 +26,17 @@ reply_types =
   'DEL': 'string'
   'SET': 'string'
   'HSET': 'string'
+  'LRANGE': 'list'
   
 command_map =
   'string': 'GET'
   'hash': 'HGETALL'
+  'list': 'LRANGE'
   
 format_json = (data, indent = '') ->
   return data if _.isNumber(data)
   
-  new_indent = '  '
+  next_indent = '  '
 
   is_array = _.isArray(data)
   
@@ -57,13 +59,13 @@ format_json = (data, indent = '') ->
     html += ', ' if i > 0
 
     if is_array
-      html += '\n' + indent + new_indent
+      html += '\n' + indent + next_indent
     else
-      html += '\n' + indent + new_indent + '<strong>\"' + key + '\":</strong> '
+      html += '\n' + indent + next_indent + '<strong>\"' + key + '\":</strong> '
 
     switch typeof val
       when 'object'
-        html += format_json(val, indent + new_indent)
+        html += format_json(val, indent + next_indent)
       when 'string'
         html += '\"' + JSON.stringify(val).replace(/^"|"$/g, '').replace(/'/g, "\\'").replace(/\\"/g, '"') + '\"'
       when 'number'
@@ -99,6 +101,7 @@ socket.on 'connection', (client) ->
             client.send
               reply: key
               type: type
+              title: message
               command: command_map[type]
               reply_type: reply_type
           return
@@ -107,8 +110,17 @@ socket.on 'connection', (client) ->
           try
             json_reply = JSON.parse(reply)
             reply = format_json(json_reply)
+        if reply_type is 'hash' or reply_type is 'list'
+          json_reply = {}
+          _.each reply, (val, key) ->
+            try
+              val = format_json(JSON.parse(val))
+            json_reply[key] = val
+            return
+          reply = json_reply
 
         client.send
+          title: message
           reply: reply
           reply_type: reply_type or 'string'
 

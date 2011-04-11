@@ -23,21 +23,23 @@
     'HGETALL': 'hash',
     'DEL': 'string',
     'SET': 'string',
-    'HSET': 'string'
+    'HSET': 'string',
+    'LRANGE': 'list'
   };
   command_map = {
     'string': 'GET',
-    'hash': 'HGETALL'
+    'hash': 'HGETALL',
+    'list': 'LRANGE'
   };
   format_json = function(data, indent) {
-    var closing_brace, html, i, is_array, new_indent;
+    var closing_brace, html, i, is_array, next_indent;
     if (indent == null) {
       indent = '';
     }
     if (_.isNumber(data)) {
       return data;
     }
-    new_indent = '  ';
+    next_indent = '  ';
     is_array = _.isArray(data);
     if (is_array) {
       if (data.length === 0) {
@@ -60,13 +62,13 @@
         html += ', ';
       }
       if (is_array) {
-        html += '\n' + indent + new_indent;
+        html += '\n' + indent + next_indent;
       } else {
-        html += '\n' + indent + new_indent + '<strong>\"' + key + '\":</strong> ';
+        html += '\n' + indent + next_indent + '<strong>\"' + key + '\":</strong> ';
       }
       switch (typeof val) {
         case 'object':
-          html += format_json(val, indent + new_indent);
+          html += format_json(val, indent + next_indent);
           break;
         case 'string':
           html += '\"' + JSON.stringify(val).replace(/^"|"$/g, '').replace(/'/g, "\\'").replace(/\\"/g, '"') + '\"';
@@ -105,6 +107,7 @@
               return client.send({
                 reply: key,
                 type: type,
+                title: message,
                 command: command_map[type],
                 reply_type: reply_type
               });
@@ -117,7 +120,18 @@
               reply = format_json(json_reply);
             } catch (_e) {}
           }
+          if (reply_type === 'hash' || reply_type === 'list') {
+            json_reply = {};
+            _.each(reply, function(val, key) {
+              try {
+                val = format_json(JSON.parse(val));
+              } catch (_e) {}
+              json_reply[key] = val;
+            });
+            reply = json_reply;
+          }
           return client.send({
+            title: message,
             reply: reply,
             reply_type: reply_type || 'string'
           });

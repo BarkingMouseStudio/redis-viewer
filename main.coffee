@@ -4,14 +4,22 @@ $ ->
     'key': _.template(document.getElementById('key-template').innerHTML)
     'string': _.template(document.getElementById('string-template').innerHTML)
     'hash': _.template(document.getElementById('hash-template').innerHTML)
+    'list': _.template(document.getElementById('list-template').innerHTML)
 
   socket = new io.Socket(location.hostname)
   socket.connect()
 
   $results = $('ul#results')
+  title_el = document.getElementById('title')
+  subtitle_el = document.getElementById('subtitle')
   command_el = document.getElementById('command');
 
   socket.on 'message', (message) ->
+    console.log message
+
+    title_el.innerHTML = message.title
+    subtitle_el.innerHTML = message.reply_type
+
     $results.append templates[message.reply_type](message)
     return
 
@@ -26,20 +34,18 @@ $ ->
     $results.empty()
     command = 'KEYS *' if not command
     location.hash = command
-    command_el.value = command
     socket.send(command)
 
   $('a').live 'click', (e) ->
-    command = parse_command(e.target.href)
-    send_command(command)
+    return false if e.target.className is 'confirm' and not confirm('Are you sure?')
+    send_command parse_command e.target.href
     return
-
-  command = parse_command(location.href)
-  send_command(command)
 
   command_el.addEventListener 'keypress', (e) ->
     return if e.keyCode isnt 13
-    command = e.target.value
-    send_command(command)
+    send_command(e.target.value)
+    e.target.value = ''
     return
+
+  send_command parse_command location.href
 

@@ -1,16 +1,22 @@
 (function() {
   $(function() {
-    var $results, command, command_el, parse_command, send_command, socket, templates;
+    var $results, command_el, parse_command, send_command, socket, subtitle_el, templates, title_el;
     templates = {
       'key': _.template(document.getElementById('key-template').innerHTML),
       'string': _.template(document.getElementById('string-template').innerHTML),
-      'hash': _.template(document.getElementById('hash-template').innerHTML)
+      'hash': _.template(document.getElementById('hash-template').innerHTML),
+      'list': _.template(document.getElementById('list-template').innerHTML)
     };
     socket = new io.Socket(location.hostname);
     socket.connect();
     $results = $('ul#results');
+    title_el = document.getElementById('title');
+    subtitle_el = document.getElementById('subtitle');
     command_el = document.getElementById('command');
     socket.on('message', function(message) {
+      console.log(message);
+      title_el.innerHTML = message.title;
+      subtitle_el.innerHTML = message.reply_type;
       $results.append(templates[message.reply_type](message));
     });
     parse_command = function(href) {
@@ -31,22 +37,21 @@
         command = 'KEYS *';
       }
       location.hash = command;
-      command_el.value = command;
       return socket.send(command);
     };
     $('a').live('click', function(e) {
-      var command;
-      command = parse_command(e.target.href);
-      send_command(command);
+      if (e.target.className === 'confirm' && !confirm('Are you sure?')) {
+        return false;
+      }
+      send_command(parse_command(e.target.href));
     });
-    command = parse_command(location.href);
-    send_command(command);
-    return command_el.addEventListener('keypress', function(e) {
+    command_el.addEventListener('keypress', function(e) {
       if (e.keyCode !== 13) {
         return;
       }
-      command = e.target.value;
-      send_command(command);
+      send_command(e.target.value);
+      e.target.value = '';
     });
+    return send_command(parse_command(location.href));
   });
 }).call(this);
