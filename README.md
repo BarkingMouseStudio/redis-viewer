@@ -35,7 +35,7 @@ Installation
 
 Features
 --------
-* view redis store keys and values - string, key and hash currently supported
+* view redis store keys and values - string, key, list and hash currently supported
 * delete individual keys
 * execute arbitrary commands
-* formats JSON string values
+* formats JSON values
