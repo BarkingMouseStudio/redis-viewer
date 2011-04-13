@@ -1,10 +1,15 @@
 (function() {
-  var app, command_map, commands, express, format_json, io, redis, redis_client, reply_types, socket, _;
+  var app, commands, express, format_json, io, key_command_map, redis, redis_client, reply_types, socket, _;
   express = require('express');
   redis = require('redis');
   io = require('socket.io');
   _ = require('underscore');
   commands = require('./commands');
+  format_json = require('./format_json');
+  _.each(commands, function(val, key) {
+    return console.log(key);
+  });
+  redis.debug_mode = true;
   redis_client = redis.createClient();
   redis_client.on('error', function(error) {
     return console.log(error);
@@ -18,87 +23,19 @@
   console.log('listening on :3000');
   socket = io.listen(app);
   reply_types = {
-    'KEYS': 'key',
-    'GET': 'string',
+    'KEYS': 'keys',
     'HGETALL': 'hash',
-    'DEL': 'string',
-    'SET': 'string',
-    'HSET': 'string',
     'LRANGE': 'list',
     'SMEMBERS': 'set',
-    'ZRANGE': 'zset'
+    'ZRANGE': 'zset',
+    'ZADD': 'integer'
   };
-  command_map = {
+  key_command_map = {
     'string': 'GET',
     'hash': 'HGETALL',
     'list': 'LRANGE',
     'set': 'SMEMBERS',
     'zset': 'ZRANGE'
-  };
-  format_json = function(data, indent) {
-    var closing_brace, html, i, is_array, next_indent;
-    if (indent == null) {
-      indent = '';
-    }
-    if (_.isString(data)) {
-      return "\"" + data + "\"";
-    }
-    try {
-      data = JSON.parse(data);
-    } catch (_e) {}
-    if (_.isNull(data)) {
-      return '(nil)';
-    }
-    if (_.isNumber(data)) {
-      return data;
-    }
-    next_indent = '  ';
-    is_array = _.isArray(data);
-    if (is_array) {
-      if (data.length === 0) {
-        return '[]';
-      } else {
-        closing_brace = ']';
-        html = '[';
-      }
-    } else {
-      if (_.size(data) === 0) {
-        return '{}';
-      } else {
-        closing_brace = '}';
-        html = '{';
-      }
-    }
-    i = 0;
-    _.each(data, function(val, key) {
-      if (i > 0) {
-        html += ', ';
-      }
-      if (is_array) {
-        html += '\n' + indent + next_indent;
-      } else {
-        html += '\n' + indent + next_indent + '<strong>\"' + key + '\":</strong> ';
-      }
-      switch (typeof val) {
-        case 'object':
-          html += format_json(val, indent + next_indent);
-          break;
-        case 'string':
-          html += '\"' + JSON.stringify(val).replace(/^"|"$/g, '').replace(/'/g, "\\'").replace(/\\"/g, '"') + '\"';
-          break;
-        case 'number':
-          html += JSON.stringify(val);
-          break;
-        case 'boolean':
-          html += JSON.stringify(val);
-          break;
-        default:
-          html += '\"' + JSON.stringify(val) + '\"';
-      }
-      return i++;
-    });
-    html += '\n' + indent + closing_brace;
-    return html;
   };
   socket.on('connection', function(client) {
     client.on('message', function(message) {
@@ -121,7 +58,7 @@
                 reply: key,
                 type: type,
                 title: message,
-                command: command_map[type],
+                command: key_command_map[type],
                 reply_type: reply_type
               });
             });

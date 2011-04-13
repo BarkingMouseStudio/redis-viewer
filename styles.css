@@ -54,10 +54,10 @@ ul#results {
 ul#results li {
   margin: 0 0 10px;
   background: #fafafa;
-  display: block;
   padding: 10px;
   border-radius: 5px;
   box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
+  overflow: hidden;
 }
 ul#results li a {
   text-shadow: 1px 1px 0 #f0f0f0;
@@ -72,19 +72,19 @@ pre {
   font-family: Menlo, Monaco, Consolas, monospace;
   margin: 0;
 }
-.hash-row {
-  overflow: hidden;
-  padding: 0 0 10px;
-  margin: 0 0 10px;
-  border-bottom: 1px solid #eee;
+.type {
+  float: left;
+  margin: 0 0 0 10px;
+  padding: 11px 0 0;
+  font-size: 10px;
 }
-.hash-key {
+.key {
   font-weight: bold;
   float: left;
   margin: 0 10px 0 0;
   padding: 11px 0 0;
 }
-.hash-val {
+.val {
   float: left;
 }
 pre {
