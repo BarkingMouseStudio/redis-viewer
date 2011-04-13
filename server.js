@@ -40,6 +40,15 @@
     if (indent == null) {
       indent = '';
     }
+    if (_.isString(data)) {
+      return "\"" + data + "\"";
+    }
+    try {
+      data = JSON.parse(data);
+    } catch (_e) {}
+    if (_.isNull(data)) {
+      return '(nil)';
+    }
     if (_.isNumber(data)) {
       return data;
     }
@@ -120,15 +129,14 @@
         } else {
           if (reply_type === 'string') {
             try {
-              json_reply = JSON.parse(reply);
-              reply = format_json(json_reply);
+              reply = format_json(reply);
             } catch (_e) {}
           }
           if (reply_type === 'hash' || reply_type === 'list' || reply_type === 'set') {
             json_reply = {};
             _.each(reply, function(val, key) {
               try {
-                val = format_json(JSON.parse(val));
+                val = format_json(val);
               } catch (_e) {}
               json_reply[key] = val;
             });
@@ -138,7 +146,7 @@
             json_reply = {};
             _.each(reply, function(val, key) {
               try {
-                val = format_json(JSON.parse(val));
+                val = format_json(val);
               } catch (_e) {}
               json_reply[key] = val;
             });

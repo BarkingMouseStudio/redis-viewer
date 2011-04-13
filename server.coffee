@@ -38,8 +38,15 @@ command_map =
   'zset': 'ZRANGE'
   
 format_json = (data, indent = '') ->
+  return "\"#{data}\"" if _.isString(data)
+
+  try
+    data = JSON.parse(data)
+
+  return '(nil)' if _.isNull(data)
+
   return data if _.isNumber(data)
-  
+
   next_indent = '  '
 
   is_array = _.isArray(data)
@@ -112,14 +119,13 @@ socket.on 'connection', (client) ->
       else
         if reply_type is 'string'
           try
-            json_reply = JSON.parse(reply)
-            reply = format_json(json_reply)
+            reply = format_json(reply)
         if reply_type is 'hash' or reply_type is 'list' or reply_type is 'set'
           json_reply = {}
 
           _.each reply, (val, key) ->
             try
-              val = format_json(JSON.parse(val))
+              val = format_json(val)
             json_reply[key] = val
             return
           reply = json_reply
@@ -128,7 +134,7 @@ socket.on 'connection', (client) ->
 
           _.each reply, (val, key) ->
             try
-              val = format_json(JSON.parse(val))
+              val = format_json(val)
             json_reply[key] = val
             return
           reply = json_reply
