@@ -5,6 +5,8 @@ $ ->
     'string': _.template(document.getElementById('string-template').innerHTML)
     'hash': _.template(document.getElementById('hash-template').innerHTML)
     'list': _.template(document.getElementById('list-template').innerHTML)
+    'set': _.template(document.getElementById('set-template').innerHTML)
+    'zset': _.template(document.getElementById('set-template').innerHTML)
 
   socket = new io.Socket(location.hostname)
   socket.connect()
@@ -12,11 +14,9 @@ $ ->
   $results = $('ul#results')
   title_el = document.getElementById('title')
   subtitle_el = document.getElementById('subtitle')
-  command_el = document.getElementById('command');
+  command_el = document.getElementById('command')
 
   socket.on 'message', (message) ->
-    console.log message
-
     title_el.innerHTML = message.title
     subtitle_el.innerHTML = message.reply_type
 

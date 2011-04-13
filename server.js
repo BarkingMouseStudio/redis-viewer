@@ -24,12 +24,16 @@
     'DEL': 'string',
     'SET': 'string',
     'HSET': 'string',
-    'LRANGE': 'list'
+    'LRANGE': 'list',
+    'SMEMBERS': 'set',
+    'ZRANGE': 'zset'
   };
   command_map = {
     'string': 'GET',
     'hash': 'HGETALL',
-    'list': 'LRANGE'
+    'list': 'LRANGE',
+    'set': 'SMEMBERS',
+    'zset': 'ZRANGE'
   };
   format_json = function(data, indent) {
     var closing_brace, html, i, is_array, next_indent;
@@ -120,7 +124,17 @@
               reply = format_json(json_reply);
             } catch (_e) {}
           }
-          if (reply_type === 'hash' || reply_type === 'list') {
+          if (reply_type === 'hash' || reply_type === 'list' || reply_type === 'set') {
+            json_reply = {};
+            _.each(reply, function(val, key) {
+              try {
+                val = format_json(JSON.parse(val));
+              } catch (_e) {}
+              json_reply[key] = val;
+            });
+            reply = json_reply;
+          }
+          if (reply_type === 'zset') {
             json_reply = {};
             _.each(reply, function(val, key) {
               try {

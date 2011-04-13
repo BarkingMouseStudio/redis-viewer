@@ -27,11 +27,15 @@ reply_types =
   'SET': 'string'
   'HSET': 'string'
   'LRANGE': 'list'
+  'SMEMBERS': 'set'
+  'ZRANGE': 'zset'
   
 command_map =
   'string': 'GET'
   'hash': 'HGETALL'
   'list': 'LRANGE'
+  'set': 'SMEMBERS'
+  'zset': 'ZRANGE'
   
 format_json = (data, indent = '') ->
   return data if _.isNumber(data)
@@ -110,8 +114,18 @@ socket.on 'connection', (client) ->
           try
             json_reply = JSON.parse(reply)
             reply = format_json(json_reply)
-        if reply_type is 'hash' or reply_type is 'list'
+        if reply_type is 'hash' or reply_type is 'list' or reply_type is 'set'
           json_reply = {}
+
+          _.each reply, (val, key) ->
+            try
+              val = format_json(JSON.parse(val))
+            json_reply[key] = val
+            return
+          reply = json_reply
+        if reply_type is 'zset'
+          json_reply = {}
+
           _.each reply, (val, key) ->
             try
               val = format_json(JSON.parse(val))

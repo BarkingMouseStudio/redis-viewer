@@ -16,7 +16,7 @@
 
   <script type="text/template" id="key-template">
     <li>
-      <a href="#<%= command %> <%= reply %><% if (command === 'LRANGE') { %> 0 -1<% } %>"><%= reply %></a>
+      <a href="#<%= command %> <%= reply %><% if (command === 'LRANGE') { %> 0 -1<% } %><% if (command === 'ZRANGE') { %> 0 -1 WITHSCORES<% } %>"><%= reply %></a>
       <span><%= type %></span>
       <a href='#DEL <%= reply %>' class="confirm">[DEL?]</a>
     </li>
@@ -44,6 +44,15 @@
       <a href='#KEYS *'>[KEYS *]</a>
     </li>
   </script>
+  <script type="text/template" id="set-template">
+    <li>
+      <% _.each(reply, function(val, key) { %>
+        <div class="hash-row"><div class="hash-key"><%= key %>:</div> <pre class="hash-val"><%= val %></pre></div>
+      <% }); %>
+      <a href='#KEYS *'>[KEYS *]</a>
+    </li>
+  </script>
+  
 </head>
 <body>
   <header id="main-header">

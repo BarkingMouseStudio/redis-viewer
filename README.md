@@ -39,3 +39,10 @@ Features
 * delete individual keys
 * execute arbitrary commands
 * formats JSON values
+
+----------
+
+TODO
+----
+* distinguish between integer and bulk responses
+* include scores within the zset items, not as separate items
