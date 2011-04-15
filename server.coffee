@@ -3,7 +3,7 @@ redis   = require('redis')
 io      = require('socket.io')
 _ = require('underscore')
 commands = require('./commands')
-redis.debug_mode = true
+# redis.debug_mode = true
 redis_client = redis.createClient()
 
 redis_client.on 'error', (error) ->

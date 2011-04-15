@@ -16,10 +16,10 @@
 
   <script type="text/template" id="key-template">
     <li>
+      <div class="type"><%= type %></div>
       <div class="val">
         <a href="#<%= key_command %> <%= reply %><% if (key_command === 'LRANGE') { %> 0 -1<% } %><% if (key_command === 'ZRANGE') { %> 0 -1 WITHSCORES<% } %>"><%= reply %></a>
       </div>
-      <div class="type"><%= type %></div>
     </li>
   </script>
   <script type="text/template" id="error-template">
