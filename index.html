@@ -16,16 +16,28 @@
 
   <script type="text/template" id="key-template">
     <li>
-      <pre class="val"><a href="#<%= key_command %> <%= reply %><% if (key_command === 'LRANGE') { %> 0 -1<% } %><% if (key_command === 'ZRANGE') { %> 0 -1 WITHSCORES<% } %>"><%= reply %></a></pre>
+      <div class="val">
+        <a href="#<%= key_command %> <%= reply %><% if (key_command === 'LRANGE') { %> 0 -1<% } %><% if (key_command === 'ZRANGE') { %> 0 -1 WITHSCORES<% } %>"><%= reply %></a>
+      </div>
       <div class="type"><%= type %></div>
     </li>
   </script>
-  <script type="text/template" id="string-template">
+  <script type="text/template" id="error-template">
+    <li>
+      <pre class="val"><%= reply %></pre>
+    </li>
+  </script>
+  <script type="text/template" id="bulk-template">
     <li>
       <pre class="val"><%= reply %></pre>
     </li>
   </script>
   <script type="text/template" id="integer-template">
+    <li>
+      <div class="type">(<%= reply_type %>)</div><pre class="val"><%= reply %></pre>
+    </li>
+  </script>
+  <script type="text/template" id="status-template">
     <li>
       <pre class="val"><%= reply %></pre>
     </li>
@@ -33,28 +45,28 @@
   <script type="text/template" id="hash-template">
     <% _.each(reply, function(val, key) { %>
       <li>
-        <div class="key"><%= key %>:</div> <pre class="val"><%= val %></pre>
+        <div class="key"><%= key %>)</div> <pre class="val"><%= val %></pre>
       </li>
     <% }); %>
   </script>
   <script type="text/template" id="list-template">
     <% _.each(reply, function(val, key) { %>
       <li>
-        <div class="key"><%= key %>:</div> <pre class="val"><%= val %></pre>
+        <div class="key"><%= key %>)</div> <pre class="val"><%= val %></pre>
       </li>
     <% }); %>
   </script>
   <script type="text/template" id="set-template">
     <% _.each(reply, function(val, key) { %>
       <li>
-        <div class="key"><%= key %>:</div> <pre class="val"><%= val %></pre>
+        <div class="key"><%= key %>)</div> <pre class="val"><%= val %></pre>
       </li>
     <% }); %>
   </script>
   <script type="text/template" id="zset-template">
     <% _.each(reply, function(val, key) { %>
       <li>
-        <div class="key"><%= key %>:</div> <pre class="val"><%= val %></pre>
+        <div class="key"><%= key %>)</div> <pre class="val"><%= val %></pre>
       </li>
     <% }); %>
   </script>

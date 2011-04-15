@@ -3,7 +3,9 @@
     var $results, command_el, parse_command, send_command, socket, subtitle_el, templates, title_el;
     templates = {
       'keys': _.template(document.getElementById('key-template').innerHTML),
-      'string': _.template(document.getElementById('string-template').innerHTML),
+      'bulk': _.template(document.getElementById('bulk-template').innerHTML),
+      'status': _.template(document.getElementById('status-template').innerHTML),
+      'error': _.template(document.getElementById('error-template').innerHTML),
       'hash': _.template(document.getElementById('hash-template').innerHTML),
       'list': _.template(document.getElementById('list-template').innerHTML),
       'set': _.template(document.getElementById('set-template').innerHTML),

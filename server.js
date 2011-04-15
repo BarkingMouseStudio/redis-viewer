@@ -5,9 +5,7 @@
   io = require('socket.io');
   _ = require('underscore');
   commands = require('./commands');
-  _.each(commands, function(val, key) {
-    return console.log(key);
-  });
+  redis.debug_mode = true;
   redis_client = redis.createClient();
   redis_client.on('error', function(error) {
     console.log(error);
@@ -21,123 +19,127 @@
   console.log('listening on :3000');
   socket = io.listen(app);
   reply_types = {
-    APPEND: '',
-    AUTH: '',
-    BGREWRITEAOF: '',
-    BGSAVE: '',
-    BLPOP: '',
-    BRPOP: '',
-    BRPOPLPUSH: '',
-    DBSIZE: '',
-    DECR: '',
-    DECRBY: '',
-    DEL: '',
-    DISCARD: '',
-    ECHO: '',
-    EXEC: '',
-    EXISTS: '',
-    EXPIRE: '',
-    EXPIREAT: '',
-    FLUSHALL: '',
-    FLUSHDB: '',
-    GET: 'string',
-    GETBIT: '',
-    GETRANGE: '',
-    GETSET: '',
-    HDEL: '',
-    HEXISTS: '',
-    HGET: '',
+    APPEND: 'integer',
+    AUTH: 'status',
+    BGREWRITEAOF: 'status',
+    BGSAVE: 'status',
+    BLPOP: null,
+    BRPOP: null,
+    BRPOPLPUSH: null,
+    'CONFIG GET': null,
+    'CONFIG SET': null,
+    'CONFIG RESETSTAT': null,
+    DBSIZE: 'integer',
+    DECR: 'integer',
+    DECRBY: 'integer',
+    DEL: 'integer',
+    DISCARD: 'status',
+    ECHO: 'bulk',
+    EXEC: null,
+    EXISTS: 'integer',
+    EXPIRE: 'integer',
+    EXPIREAT: 'integer',
+    FLUSHALL: 'status',
+    FLUSHDB: 'status',
+    GET: 'bulk',
+    GETBIT: 'integer',
+    GETRANGE: 'bulk',
+    GETSET: 'bulk',
+    HDEL: 'integer',
+    HEXISTS: 'integer',
+    HGET: 'bulk',
     HGETALL: 'hash',
-    HINCRBY: '',
-    HKEYS: '',
-    HLEN: '',
-    HMGET: '',
-    HMSET: '',
-    HSET: '',
-    HSETNX: '',
-    HVALS: '',
-    INCR: '',
-    INCRBY: '',
-    INFO: '',
+    HINCRBY: 'integer',
+    HKEYS: 'list',
+    HLEN: 'integer',
+    HMGET: 'list',
+    HMSET: 'status',
+    HSET: 'integer',
+    HSETNX: 'integer',
+    HVALS: 'list',
+    INCR: 'integer',
+    INCRBY: 'integer',
+    INFO: 'bulk',
     KEYS: 'keys',
-    LASTSAVE: '',
-    LINDEX: '',
-    LINSERT: '',
-    LLEN: '',
-    LPOP: '',
-    LPUSH: '',
-    LPUSHX: '',
+    LASTSAVE: 'integer',
+    LINDEX: 'bulk',
+    LINSERT: 'integer',
+    LLEN: 'integer',
+    LPOP: 'bulk',
+    LPUSH: 'integer',
+    LPUSHX: 'integer',
     LRANGE: 'list',
-    LREM: '',
-    LSET: '',
-    LTRIM: '',
-    MGET: '',
-    MONITOR: '',
-    MOVE: '',
-    MSET: '',
-    MSETNX: '',
-    MULTI: '',
-    PERSIST: '',
-    PING: '',
-    PSUBSCRIBE: '',
-    PUBLISH: '',
-    PUNSUBSCRIBE: '',
-    QUIT: '',
-    RANDOMKEY: '',
-    RENAME: '',
-    RENAMENX: '',
-    RPOP: '',
-    RPOPLPUSH: '',
-    RPUSH: '',
-    RPUSHX: '',
-    SADD: '',
-    SAVE: '',
-    SCARD: '',
-    SDIFF: '',
-    SDIFFSTORE: '',
-    SELECT: '',
-    SET: '',
-    SETBIT: '',
-    SETEX: '',
-    SETNX: '',
-    SETRANGE: '',
-    SHUTDOWN: '',
-    SINTER: '',
-    SINTERSTORE: '',
-    SISMEMBER: '',
-    SLAVEOF: '',
+    LREM: 'integer',
+    LSET: 'status',
+    LTRIM: 'status',
+    MGET: 'list',
+    MONITOR: null,
+    MOVE: 'integer',
+    MSET: 'status',
+    MSETNX: 'integer',
+    MULTI: 'status',
+    OBJECT: null,
+    PERSIST: 'integer',
+    PING: 'status',
+    PSUBSCRIBE: null,
+    PUBLISH: 'integer',
+    PUNSUBSCRIBE: null,
+    QUIT: 'status',
+    RANDOMKEY: 'bulk',
+    RENAME: 'status',
+    RENAMENX: 'integer',
+    RPOP: 'bulk',
+    RPOPLPUSH: 'bulk',
+    RPUSH: 'integer',
+    RPUSHX: 'integer',
+    SADD: 'integer',
+    SAVE: null,
+    SCARD: 'integer',
+    SDIFF: 'list',
+    SDIFFSTORE: 'integer',
+    SELECT: 'status',
+    SET: 'status',
+    SETBIT: 'integer',
+    SETEX: 'status',
+    SETNX: 'integer',
+    SETRANGE: 'integer',
+    SHUTDOWN: 'status',
+    SINTER: 'list',
+    SINTERSTORE: 'integer',
+    SISMEMBER: 'integer',
+    SLAVEOF: 'status',
     SMEMBERS: 'set',
-    SMOVE: '',
-    SORT: '',
-    SPOP: '',
-    SRANDMEMBER: '',
-    SREM: '',
-    STRLEN: '',
-    SUBSCRIBE: '',
-    SUNION: '',
-    SUNIONSTORE: '',
-    SYNC: '',
-    TTL: '',
-    TYPE: '',
-    UNSUBSCRIBE: '',
-    UNWATCH: '',
-    WATCH: '',
+    SMOVE: 'integer',
+    SORT: 'list',
+    SPOP: 'bulk',
+    SRANDMEMBER: 'bulk',
+    SREM: 'integer',
+    STRLEN: 'integer',
+    SUBSCRIBE: null,
+    SUNION: 'list',
+    SUNIONSTORE: 'integer',
+    SYNC: null,
+    TTL: 'integer',
+    TYPE: 'status',
+    UNSUBSCRIBE: null,
+    UNWATCH: 'status',
+    WATCH: 'status',
     ZADD: 'integer',
-    ZCARD: '',
-    ZCOUNT: '',
-    ZINCRBY: '',
-    ZINTERSTORE: '',
+    ZCARD: 'integer',
+    ZCOUNT: 'integer',
+    ZINCRBY: 'bulk',
+    ZINTERSTORE: 'integer',
     ZRANGE: 'zset',
-    ZRANGEBYSCORE: '',
-    ZRANK: '',
-    ZREM: '',
-    ZREMRANGEBYRANK: '',
-    ZREMRANGEBYSCORE: '',
+    ZRANGEBYSCORE: 'zset',
+    ZRANK: 'integer',
+    ZREM: 'integer',
+    ZREMRANGEBYRANK: 'integer',
+    ZREMRANGEBYSCORE: 'integer',
     ZREVRANGE: 'zset',
     ZREVRANGEBYSCORE: 'zset',
-    ZREVRANK: 'zset',
-    ZSCORE: '',
-    ZUNIONSTORE: ''
+    ZREVRANK: 'integer',
+    ZSCORE: 'bulk',
+    ZUNIONSTORE: 'integer'
   };
   key_command_map = {
     string: 'GET',
@@ -157,9 +159,9 @@
       if (!command in commands) {
         return;
       }
-      reply_type = reply_types[command] || 'string';
+      reply_type = reply_types[command] || 'bulk';
       redis_client.send_command(command, args, function(error, reply) {
-        var scores, vals;
+        var response, scores, vals;
         if (command === 'KEYS') {
           _.each(reply, function(key) {
             return redis_client.TYPE(key, function(error, type) {
@@ -174,7 +176,7 @@
           });
         } else {
           switch (reply_type) {
-            case 'string':
+            case 'bulk':
               try {
                 reply = JSON.stringify(JSON.parse(reply), null, 2);
               } catch (_e) {}
@@ -189,7 +191,7 @@
                 });
                 reply = {};
                 _.each(vals, function(val, i) {
-                  return reply[scores[i]] = val;
+                  return reply["" + i + ":" + scores[i]] = val;
                 });
               } else {
                 _.each(reply, function(val, key) {
@@ -202,17 +204,27 @@
             case 'hash':
             case 'list':
             case 'set':
+            case 'zset':
               _.each(reply, function(val, key) {
                 try {
                   reply[key] = JSON.stringify(JSON.parse(val), null, 2);
                 } catch (_e) {}
               });
           }
-          client.send({
-            title: message,
-            reply: reply,
-            reply_type: reply_type
-          });
+          if (!(error != null)) {
+            response = {
+              title: message,
+              reply: reply,
+              reply_type: reply_type
+            };
+          } else {
+            response = {
+              title: message,
+              reply: error.message,
+              reply_type: 'error'
+            };
+          }
+          client.send(response);
         }
       });
     });

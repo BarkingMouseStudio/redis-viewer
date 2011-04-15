@@ -7,6 +7,7 @@ body {
 a {
   color: #06a;
   text-decoration: none;
+  text-shadow: 1px 1px 0 #f0f0f0;
 }
 a:hover {
   color: #09f;
@@ -18,9 +19,11 @@ ul {
 }
 h2 {
   color: #444;
+  margin: 0 0 10px;
 }
 h3 {
   color: #888;
+  margin: 0 0 10px;
 }
 header#main-header {
   background-image: -webkit-gradient(linear, left bottom, left top, color-stop(1, #373737), color-stop(0, #000));
@@ -50,6 +53,8 @@ section#results {
 ul#results {
   list-style: none;
   padding: 0;
+  font-size: 11px;
+  color: #444;
 }
 ul#results li {
   margin: 0 0 10px;
@@ -59,24 +64,19 @@ ul#results li {
   box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
   overflow: hidden;
 }
-ul#results li a {
-  text-shadow: 1px 1px 0 #f0f0f0;
-}
-ul#results li span,
-ul#results li div,
-ul#results li pre {
-  font-size: 11px;
-  color: #444;
-}
-pre {
+pre.val, div.val {
   font-family: Menlo, Monaco, Consolas, monospace;
   margin: 0;
+  border: 1px solid #eee;
+  background: #fff;
+  border-radius: 5px;
+  padding: 10px;
 }
 .type {
   float: left;
-  margin: 0 0 0 10px;
+  margin: 0 10px 0 0;
   padding: 11px 0 0;
-  font-size: 10px;
+  font-weight: bold;
 }
 .key {
   font-weight: bold;
@@ -87,9 +87,5 @@ pre {
 .val {
   float: left;
 }
-pre {
-  border: 1px solid #eee;
-  background: #fff;
-  border-radius: 5px;
-  padding: 10px;
+a#keys {
 }
