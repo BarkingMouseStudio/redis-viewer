@@ -13,6 +13,7 @@ redis_client = redis.createClient()
 
 redis_client.on 'error', (error) ->
   console.log error
+  return
 
 app = express.createServer()
 app.use(express.static(__dirname))

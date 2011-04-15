@@ -12,7 +12,7 @@
   redis.debug_mode = true;
   redis_client = redis.createClient();
   redis_client.on('error', function(error) {
-    return console.log(error);
+    console.log(error);
   });
   app = express.createServer();
   app.use(express.static(__dirname));

@@ -1,6 +1,6 @@
 Redis Viewer
 ============
-A simple admin interface for redis.
+Simple browser-based admin for redis
 
 ----------
 
@@ -29,7 +29,7 @@ Installation
 ------------
 1. `git clone git://github.com/ikarosdaedalos/redis-viewer.git`
 2. `cd redis-viewer/`
-3. `node server.js # redis-server must be running on localhost:[default port]`
+3. `node server.js`
 
 ----------
 
@@ -40,10 +40,3 @@ Features
 * delete individual keys
 * execute arbitrary commands
 * formats JSON values
-
-----------
-
-TODO
-----
-* distinguish between integer and bulk responses
-* include scores within the zset items, not as separate items
