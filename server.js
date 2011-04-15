@@ -1,15 +1,13 @@
 (function() {
-  var app, commands, express, format_json, io, key_command_map, redis, redis_client, reply_types, socket, _;
+  var app, commands, express, io, key_command_map, redis, redis_client, reply_types, socket, _;
   express = require('express');
   redis = require('redis');
   io = require('socket.io');
   _ = require('underscore');
   commands = require('./commands');
-  format_json = require('./format_json');
   _.each(commands, function(val, key) {
     return console.log(key);
   });
-  redis.debug_mode = true;
   redis_client = redis.createClient();
   redis_client.on('error', function(error) {
     console.log(error);
@@ -23,23 +21,134 @@
   console.log('listening on :3000');
   socket = io.listen(app);
   reply_types = {
-    'KEYS': 'keys',
-    'HGETALL': 'hash',
-    'LRANGE': 'list',
-    'SMEMBERS': 'set',
-    'ZRANGE': 'zset',
-    'ZADD': 'integer'
+    APPEND: '',
+    AUTH: '',
+    BGREWRITEAOF: '',
+    BGSAVE: '',
+    BLPOP: '',
+    BRPOP: '',
+    BRPOPLPUSH: '',
+    DBSIZE: '',
+    DECR: '',
+    DECRBY: '',
+    DEL: '',
+    DISCARD: '',
+    ECHO: '',
+    EXEC: '',
+    EXISTS: '',
+    EXPIRE: '',
+    EXPIREAT: '',
+    FLUSHALL: '',
+    FLUSHDB: '',
+    GET: 'string',
+    GETBIT: '',
+    GETRANGE: '',
+    GETSET: '',
+    HDEL: '',
+    HEXISTS: '',
+    HGET: '',
+    HGETALL: 'hash',
+    HINCRBY: '',
+    HKEYS: '',
+    HLEN: '',
+    HMGET: '',
+    HMSET: '',
+    HSET: '',
+    HSETNX: '',
+    HVALS: '',
+    INCR: '',
+    INCRBY: '',
+    INFO: '',
+    KEYS: 'keys',
+    LASTSAVE: '',
+    LINDEX: '',
+    LINSERT: '',
+    LLEN: '',
+    LPOP: '',
+    LPUSH: '',
+    LPUSHX: '',
+    LRANGE: 'list',
+    LREM: '',
+    LSET: '',
+    LTRIM: '',
+    MGET: '',
+    MONITOR: '',
+    MOVE: '',
+    MSET: '',
+    MSETNX: '',
+    MULTI: '',
+    PERSIST: '',
+    PING: '',
+    PSUBSCRIBE: '',
+    PUBLISH: '',
+    PUNSUBSCRIBE: '',
+    QUIT: '',
+    RANDOMKEY: '',
+    RENAME: '',
+    RENAMENX: '',
+    RPOP: '',
+    RPOPLPUSH: '',
+    RPUSH: '',
+    RPUSHX: '',
+    SADD: '',
+    SAVE: '',
+    SCARD: '',
+    SDIFF: '',
+    SDIFFSTORE: '',
+    SELECT: '',
+    SET: '',
+    SETBIT: '',
+    SETEX: '',
+    SETNX: '',
+    SETRANGE: '',
+    SHUTDOWN: '',
+    SINTER: '',
+    SINTERSTORE: '',
+    SISMEMBER: '',
+    SLAVEOF: '',
+    SMEMBERS: 'set',
+    SMOVE: '',
+    SORT: '',
+    SPOP: '',
+    SRANDMEMBER: '',
+    SREM: '',
+    STRLEN: '',
+    SUBSCRIBE: '',
+    SUNION: '',
+    SUNIONSTORE: '',
+    SYNC: '',
+    TTL: '',
+    TYPE: '',
+    UNSUBSCRIBE: '',
+    UNWATCH: '',
+    WATCH: '',
+    ZADD: 'integer',
+    ZCARD: '',
+    ZCOUNT: '',
+    ZINCRBY: '',
+    ZINTERSTORE: '',
+    ZRANGE: 'zset',
+    ZRANGEBYSCORE: '',
+    ZRANK: '',
+    ZREM: '',
+    ZREMRANGEBYRANK: '',
+    ZREMRANGEBYSCORE: '',
+    ZREVRANGE: 'zset',
+    ZREVRANGEBYSCORE: 'zset',
+    ZREVRANK: 'zset',
+    ZSCORE: '',
+    ZUNIONSTORE: ''
   };
   key_command_map = {
-    'string': 'GET',
-    'hash': 'HGETALL',
-    'list': 'LRANGE',
-    'set': 'SMEMBERS',
-    'zset': 'ZRANGE'
+    string: 'GET',
+    hash: 'HGETALL',
+    list: 'LRANGE',
+    set: 'SMEMBERS',
+    zset: 'ZRANGE'
   };
   socket.on('connection', function(client) {
     client.on('message', function(message) {
-      var args, command;
+      var args, command, reply_type;
       args = message.match(/(["'])(?:\\\1|.)*?\1|\S+/g);
       command = args.shift().toUpperCase();
       args = _.map(args, function(arg) {
@@ -48,51 +157,61 @@
       if (!command in commands) {
         return;
       }
-      redis_client[command](args, function(error, reply) {
-        var json_reply, reply_type;
-        reply_type = reply_types[command];
+      reply_type = reply_types[command] || 'string';
+      redis_client.send_command(command, args, function(error, reply) {
+        var scores, vals;
         if (command === 'KEYS') {
-          return _.each(reply, function(key) {
-            redis_client.TYPE(key, function(error, type) {
+          _.each(reply, function(key) {
+            return redis_client.TYPE(key, function(error, type) {
               return client.send({
-                reply: key,
-                type: type,
                 title: message,
-                command: key_command_map[type],
-                reply_type: reply_type
+                reply: key,
+                reply_type: reply_type,
+                key_command: key_command_map[type],
+                type: type
               });
             });
           });
         } else {
-          if (reply_type === 'string') {
-            try {
-              reply = format_json(reply);
-            } catch (_e) {}
-          }
-          if (reply_type === 'hash' || reply_type === 'list' || reply_type === 'set') {
-            json_reply = {};
-            _.each(reply, function(val, key) {
+          switch (reply_type) {
+            case 'string':
               try {
-                val = format_json(val);
+                reply = JSON.stringify(JSON.parse(reply), null, 2);
               } catch (_e) {}
-              json_reply[key] = val;
-            });
-            reply = json_reply;
+              break;
+            case 'zset':
+              if (_.include(args, 'WITHSCORES')) {
+                vals = _.select(reply, function(val, i) {
+                  return i % 2 === 0;
+                });
+                scores = _.select(reply, function(score, i) {
+                  return i % 2 === 1;
+                });
+                reply = {};
+                _.each(vals, function(val, i) {
+                  return reply[scores[i]] = val;
+                });
+              } else {
+                _.each(reply, function(val, key) {
+                  try {
+                    reply[key] = JSON.stringify(JSON.parse(val), null, 2);
+                  } catch (_e) {}
+                });
+              }
+              break;
+            case 'hash':
+            case 'list':
+            case 'set':
+              _.each(reply, function(val, key) {
+                try {
+                  reply[key] = JSON.stringify(JSON.parse(val), null, 2);
+                } catch (_e) {}
+              });
           }
-          if (reply_type === 'zset') {
-            json_reply = {};
-            _.each(reply, function(val, key) {
-              try {
-                val = format_json(val);
-              } catch (_e) {}
-              json_reply[key] = val;
-            });
-            reply = json_reply;
-          }
-          return client.send({
+          client.send({
             title: message,
             reply: reply,
-            reply_type: reply_type || 'string'
+            reply_type: reply_type
           });
         }
       });

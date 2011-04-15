@@ -16,11 +16,16 @@
 
   <script type="text/template" id="key-template">
     <li>
-      <pre class="val"><a href="#<%= command %> <%= reply %><% if (command === 'LRANGE') { %> 0 -1<% } %><% if (command === 'ZRANGE') { %> 0 -1 WITHSCORES<% } %>"><%= reply %></a></pre>
+      <pre class="val"><a href="#<%= key_command %> <%= reply %><% if (key_command === 'LRANGE') { %> 0 -1<% } %><% if (key_command === 'ZRANGE') { %> 0 -1 WITHSCORES<% } %>"><%= reply %></a></pre>
       <div class="type"><%= type %></div>
     </li>
   </script>
   <script type="text/template" id="string-template">
+    <li>
+      <pre class="val"><%= reply %></pre>
+    </li>
+  </script>
+  <script type="text/template" id="integer-template">
     <li>
       <pre class="val"><%= reply %></pre>
     </li>
@@ -40,6 +45,13 @@
     <% }); %>
   </script>
   <script type="text/template" id="set-template">
+    <% _.each(reply, function(val, key) { %>
+      <li>
+        <div class="key"><%= key %>:</div> <pre class="val"><%= val %></pre>
+      </li>
+    <% }); %>
+  </script>
+  <script type="text/template" id="zset-template">
     <% _.each(reply, function(val, key) { %>
       <li>
         <div class="key"><%= key %>:</div> <pre class="val"><%= val %></pre>

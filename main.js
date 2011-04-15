@@ -2,12 +2,13 @@
   $(function() {
     var $results, command_el, parse_command, send_command, socket, subtitle_el, templates, title_el;
     templates = {
-      'key': _.template(document.getElementById('key-template').innerHTML),
+      'keys': _.template(document.getElementById('key-template').innerHTML),
       'string': _.template(document.getElementById('string-template').innerHTML),
       'hash': _.template(document.getElementById('hash-template').innerHTML),
       'list': _.template(document.getElementById('list-template').innerHTML),
       'set': _.template(document.getElementById('set-template').innerHTML),
-      'zset': _.template(document.getElementById('set-template').innerHTML)
+      'zset': _.template(document.getElementById('zset-template').innerHTML),
+      'integer': _.template(document.getElementById('integer-template').innerHTML)
     };
     socket = new io.Socket(location.hostname);
     socket.connect();
