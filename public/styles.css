@@ -19,7 +19,7 @@ ul {
 }
 h2 {
   color: #444;
-  margin: 0 0 10px;
+  margin: 0 0 5px;
 }
 h3 {
   color: #888;
@@ -28,7 +28,7 @@ h3 {
 header#main-header {
   background-image: -webkit-gradient(linear, left bottom, left top, color-stop(1, #373737), color-stop(0, #000));
   padding: 10px 10%;
-  margin: 0 0 16px;
+  margin: 0 0 10px;
   color: #fff;
   box-shadow: 0 4px 4px rgba(0,0,0,0.2);
   overflow: hidden;
@@ -57,7 +57,7 @@ ul#results {
   color: #444;
 }
 ul#results li {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   background: #fafafa;
   padding: 10px;
   border-radius: 5px;
@@ -74,7 +74,7 @@ pre.val, div.val {
 }
 .type {
   float: left;
-  margin: 0 10px 0 0;
+  margin: 0 0 0 10px;
   padding: 11px 0 0;
   font-weight: bold;
 }

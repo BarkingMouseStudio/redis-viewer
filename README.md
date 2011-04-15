@@ -40,3 +40,9 @@ Features
 * delete individual keys
 * execute arbitrary commands
 * formats JSON values
+
+
+TODO
+----
+* add common command links
+* github site and screenshots

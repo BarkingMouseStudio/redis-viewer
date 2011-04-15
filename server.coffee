@@ -2,7 +2,7 @@ express = require('express')
 redis   = require('redis')
 io      = require('socket.io')
 _ = require('underscore')
-commands = require('./commands')
+
 # redis.debug_mode = true
 redis_client = redis.createClient()
 
@@ -11,7 +11,7 @@ redis_client.on 'error', (error) ->
   return
 
 app = express.createServer()
-app.use(express.static(__dirname))
+app.use(express.static(__dirname + '/public'))
 app.use(express.logger({ 'format': ':method :url' })) #'
 
 app.listen(3000)
@@ -159,7 +159,7 @@ socket.on 'connection', (client) ->
     args = _.map args, (arg) ->
       return arg.replace(/^(["'])(.*?)\1$/g, '$2')
 
-    return if not command of commands
+    return if not command of reply_types
 
     reply_type = reply_types[command] or 'bulk'
 
@@ -176,8 +176,11 @@ socket.on 'connection', (client) ->
       else
         switch reply_type
           when 'bulk'
-            try # attempt to parse bulk values containing JSON
-              reply = JSON.stringify(JSON.parse(reply), null, 2)
+            if reply?
+              try # attempt to parse bulk values containing JSON
+                reply = JSON.stringify(JSON.parse(reply), null, 2)
+            else
+              reply = '(nil)'
           when 'zset' # handle scores in zsets as keys
             if _.include args, 'WITHSCORES'
               vals = _.select reply, (val, i) ->

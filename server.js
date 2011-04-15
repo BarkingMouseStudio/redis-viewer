@@ -1,16 +1,15 @@
 (function() {
-  var app, commands, express, io, key_command_map, redis, redis_client, reply_types, socket, _;
+  var app, express, io, key_command_map, redis, redis_client, reply_types, socket, _;
   express = require('express');
   redis = require('redis');
   io = require('socket.io');
   _ = require('underscore');
-  commands = require('./commands');
   redis_client = redis.createClient();
   redis_client.on('error', function(error) {
     console.log(error);
   });
   app = express.createServer();
-  app.use(express.static(__dirname));
+  app.use(express.static(__dirname + '/public'));
   app.use(express.logger({
     'format': ':method :url'
   }));
@@ -155,7 +154,7 @@
       args = _.map(args, function(arg) {
         return arg.replace(/^(["'])(.*?)\1$/g, '$2');
       });
-      if (!command in commands) {
+      if (!command in reply_types) {
         return;
       }
       reply_type = reply_types[command] || 'bulk';
@@ -176,9 +175,13 @@
         } else {
           switch (reply_type) {
             case 'bulk':
-              try {
-                reply = JSON.stringify(JSON.parse(reply), null, 2);
-              } catch (_e) {}
+              if (reply != null) {
+                try {
+                  reply = JSON.stringify(JSON.parse(reply), null, 2);
+                } catch (_e) {}
+              } else {
+                reply = '(nil)';
+              }
               break;
             case 'zset':
               if (_.include(args, 'WITHSCORES')) {
