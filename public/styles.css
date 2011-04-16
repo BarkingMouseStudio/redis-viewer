@@ -87,5 +87,8 @@ pre.val, div.val {
 .val {
   float: left;
 }
-a#keys {
+.commands {
+  float: left;
+  margin: 0 0 0 10px;
+  padding: 11px 0 0;
 }
