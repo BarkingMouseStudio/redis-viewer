@@ -40,8 +40,9 @@ $ ->
     socket.send(command)
 
   $('a').live 'click', (e) ->
-    return false if e.target.className is 'confirm' and not confirm('Are you sure?')
-    send_command parse_command e.target.href
+    command = parse_command e.target.href
+    return false if e.target.className is 'confirm' and not confirm("Are you sure you want to run this command?\n\n#{command}")
+    send_command command
     return
 
   command_el.addEventListener 'keypress', (e) ->
@@ -50,5 +51,10 @@ $ ->
     e.target.value = ''
     return
 
+  document.addEventListener 'keyup', (e) ->
+    command_el.focus() if e.keyCode is 191
+    return
+  , false
+  
   send_command parse_command location.href
 

@@ -92,3 +92,15 @@ pre.val, div.val {
   margin: 0 0 0 10px;
   padding: 11px 0 0;
 }
+ul#quick {
+  clear: both;
+  overflow: hidden;
+}
+ul#quick > li {
+  float: left;
+  margin: 0 5px 0 0;
+}
+ul#quick > li a {
+  text-shadow: 1px 1px 0 #666;
+  color: #fff;
+}

@@ -44,10 +44,12 @@
       return socket.send(command);
     };
     $('a').live('click', function(e) {
-      if (e.target.className === 'confirm' && !confirm('Are you sure?')) {
+      var command;
+      command = parse_command(e.target.href);
+      if (e.target.className === 'confirm' && !confirm("Are you sure you want to run this command?\n\n" + command)) {
         return false;
       }
-      send_command(parse_command(e.target.href));
+      send_command(command);
     });
     command_el.addEventListener('keypress', function(e) {
       if (e.keyCode !== 13) {
@@ -56,6 +58,11 @@
       send_command(e.target.value);
       e.target.value = '';
     });
+    document.addEventListener('keyup', function(e) {
+      if (e.keyCode === 191) {
+        command_el.focus();
+      }
+    }, false);
     return send_command(parse_command(location.href));
   });
 }).call(this);

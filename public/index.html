@@ -46,30 +46,39 @@
     </li>
   </script>
   <script type="text/template" id="hash-template">
-    <% _.each(reply, function(val, key) { %>
+    <% _.each(reply, function(row) { %>
       <li>
-        <div class="key"><%= key %>)</div> <pre class="val"><%= val %></pre>
+        <div class="key"><%= row.index %>)</div> <pre class="val"><%= row.val %></pre>
+        <div class="commands">
+          <a href="#HDEL <%= key %> <%= row.index %>" class="confirm">[HDEL]</a>
+        </div>
       </li>
     <% }); %>
   </script>
   <script type="text/template" id="list-template">
-    <% _.each(reply, function(val, key) { %>
+    <% _.each(reply, function(row) { %>
       <li>
-        <div class="key"><%= key %>)</div> <pre class="val"><%= val %></pre>
+        <div class="key"><%= row.index %>)</div> <pre class="val"><%= row.val %></pre>
       </li>
     <% }); %>
   </script>
   <script type="text/template" id="set-template">
-    <% _.each(reply, function(val, key) { %>
+    <% _.each(reply, function(row) { %>
       <li>
-        <div class="key"><%= key %>)</div> <pre class="val"><%= val %></pre>
+        <div class="key"><%= row.index %>)</div> <pre class="val"><%= row.val %></pre>
+        <div class="commands">
+          <a href='#SREM <%= key %> "<%= row.val %>"' class="confirm">[SREM]</a>
+        </div>
       </li>
     <% }); %>
   </script>
   <script type="text/template" id="zset-template">
-    <% _.each(reply, function(val, key) { %>
+    <% _.each(reply, function(row) { %>
       <li>
-        <div class="key"><%= key %>)</div> <pre class="val"><%= val %></pre>
+        <div class="key"><%= row.index %>:<%= row.score %>)</div> <pre class="val"><%= row.val %></pre>
+        <div class="commands">
+          <a href='#ZREM <%= key %> "<%= row.val %>"' class="confirm">[ZREM]</a>
+        </div>
       </li>
     <% }); %>
   </script>
@@ -77,8 +86,14 @@
 </head>
 <body>
   <header id="main-header">
-    <input type="text" id="command" placeholder="redis>" />
+    <input type="text" id="command" placeholder="redis>" autofocus />
     <h1><a href="http://redis.io/" title="redis.io" target="_blank"><img src="redis-logo.png" alt="redis.io" /></a></h1>
+    <ul id="quick">
+      <li><a href="#KEYS *">[KEYS *]</a></li>
+      <li><a href="#INFO">[INFO]</a></li>
+      <li><a href="#FLUSHALL" class="confirm">[FLUSHALL]</a></li>
+      <li><a href="#FLUSHDB" class="confirm">[FLUSHDB]</a></li>
+    </ul>
   </header>
   <section id="results">
     <h2 id="title"></h2>

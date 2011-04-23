@@ -153,11 +153,14 @@ key_command_map =
 socket.on 'connection', (client) ->
 
   client.on 'message', (message) ->
-    args = message.match(/(["'])(?:\\\1|.)*?\1|\S+/g)
+    args = message.match(/(["'])(?:\\\1|.)*?\1|\S+/g) #"
     command = args.shift().toUpperCase()
 
+    if command is 'CONFIG'
+      command += " #{args.shift().toUpperCase()}"
+
     args = _.map args, (arg) ->
-      return arg.replace(/^(["'])(.*?)\1$/g, '$2')
+      return arg.replace(/^(["'])(.*?)\1$/g, '$2') #"
 
     return if not command of reply_types
 
@@ -173,49 +176,46 @@ socket.on 'connection', (client) ->
               reply_type: reply_type
               key_command: key_command_map[type]
               type: type
+        return
+
+      if reply_type is 'zset' and _.include args, 'WITHSCORES' # handle scores in zsets as keys
+        vals = _.select reply, (val, i) ->
+          return i % 2 == 0
+        scores = _.select reply, (score, i) ->
+          return i % 2 == 1
+        rows = []
+        _.each vals, (val, i) ->
+          rows.push({ index: i, val: val, score: scores[i] })
+        reply = rows
+      else if reply_type is 'hash' or reply_type is 'list' or reply_type is 'set' or reply_type is 'zset'
+        rows = []
+        _.each reply, (val, key) ->
+          try
+            val = JSON.stringify(JSON.parse(val), null, 2)
+          rows.push({ index: key, val: val })
+          return
+        reply = rows
       else
-        switch reply_type
-          when 'bulk'
-            if reply?
-              try # attempt to parse bulk values containing JSON
-                reply = JSON.stringify(JSON.parse(reply), null, 2)
-            else
-              reply = '(nil)'
-          when 'zset' # handle scores in zsets as keys
-            if _.include args, 'WITHSCORES'
-              vals = _.select reply, (val, i) ->
-                return i % 2 == 0
-
-              scores = _.select reply, (score, i) ->
-                return i % 2 == 1
-
-              reply = {}
-              
-              _.each vals, (val, i) ->
-                reply["#{i}:#{scores[i]}"] = val
-            else
-              _.each reply, (val, key) ->
-                try
-                  reply[key] = JSON.stringify(JSON.parse(val), null, 2)
-                return
-          when 'hash', 'list', 'set', 'zset'
-            _.each reply, (val, key) ->
-              try
-                reply[key] = JSON.stringify(JSON.parse(val), null, 2)
-              return
-
-        if not error?
-          response =
-            title: message
-            reply: reply
-            reply_type: reply_type
+        if reply?
+          try # attempt to parse bulk values containing JSON
+            reply = JSON.stringify(JSON.parse(reply), null, 2)
         else
-          response =
-            title: message
-            reply: error.message
-            reply_type: 'error'
+          reply = '(nil)'
 
-        client.send response
+      if not error?
+        response =
+          title: message
+          key: args[0]
+          reply: reply
+          reply_type: reply_type
+      else
+        response =
+          title: message
+          reply: error.message
+          reply_type: 'error'
+
+      client.send response
+
       return
 
     return

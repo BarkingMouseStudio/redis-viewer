@@ -151,6 +151,9 @@
       var args, command, reply_type;
       args = message.match(/(["'])(?:\\\1|.)*?\1|\S+/g);
       command = args.shift().toUpperCase();
+      if (command === 'CONFIG') {
+        command += " " + (args.shift().toUpperCase());
+      }
       args = _.map(args, function(arg) {
         return arg.replace(/^(["'])(.*?)\1$/g, '$2');
       });
@@ -159,7 +162,7 @@
       }
       reply_type = reply_types[command] || 'bulk';
       redis_client.send_command(command, args, function(error, reply) {
-        var response, scores, vals;
+        var response, rows, scores, vals;
         if (command === 'KEYS') {
           _.each(reply, function(key) {
             return redis_client.TYPE(key, function(error, type) {
@@ -172,62 +175,60 @@
               });
             });
           });
-        } else {
-          switch (reply_type) {
-            case 'bulk':
-              if (reply != null) {
-                try {
-                  reply = JSON.stringify(JSON.parse(reply), null, 2);
-                } catch (_e) {}
-              } else {
-                reply = '(nil)';
-              }
-              break;
-            case 'zset':
-              if (_.include(args, 'WITHSCORES')) {
-                vals = _.select(reply, function(val, i) {
-                  return i % 2 === 0;
-                });
-                scores = _.select(reply, function(score, i) {
-                  return i % 2 === 1;
-                });
-                reply = {};
-                _.each(vals, function(val, i) {
-                  return reply["" + i + ":" + scores[i]] = val;
-                });
-              } else {
-                _.each(reply, function(val, key) {
-                  try {
-                    reply[key] = JSON.stringify(JSON.parse(val), null, 2);
-                  } catch (_e) {}
-                });
-              }
-              break;
-            case 'hash':
-            case 'list':
-            case 'set':
-            case 'zset':
-              _.each(reply, function(val, key) {
-                try {
-                  reply[key] = JSON.stringify(JSON.parse(val), null, 2);
-                } catch (_e) {}
-              });
-          }
-          if (!(error != null)) {
-            response = {
-              title: message,
-              reply: reply,
-              reply_type: reply_type
-            };
-          } else {
-            response = {
-              title: message,
-              reply: error.message,
-              reply_type: 'error'
-            };
-          }
-          client.send(response);
+          return;
         }
+        if (reply_type === 'zset' && _.include(args, 'WITHSCORES')) {
+          vals = _.select(reply, function(val, i) {
+            return i % 2 === 0;
+          });
+          scores = _.select(reply, function(score, i) {
+            return i % 2 === 1;
+          });
+          rows = [];
+          _.each(vals, function(val, i) {
+            return rows.push({
+              index: i,
+              val: val,
+              score: scores[i]
+            });
+          });
+          reply = rows;
+        } else if (reply_type === 'hash' || reply_type === 'list' || reply_type === 'set' || reply_type === 'zset') {
+          rows = [];
+          _.each(reply, function(val, key) {
+            try {
+              val = JSON.stringify(JSON.parse(val), null, 2);
+            } catch (_e) {}
+            rows.push({
+              index: key,
+              val: val
+            });
+          });
+          reply = rows;
+        } else {
+          if (reply != null) {
+            try {
+              reply = JSON.stringify(JSON.parse(reply), null, 2);
+            } catch (_e) {}
+          } else {
+            reply = '(nil)';
+          }
+        }
+        if (!(error != null)) {
+          response = {
+            title: message,
+            key: args[0],
+            reply: reply,
+            reply_type: reply_type
+          };
+        } else {
+          response = {
+            title: message,
+            reply: error.message,
+            reply_type: 'error'
+          };
+        }
+        client.send(response);
       });
     });
   });
