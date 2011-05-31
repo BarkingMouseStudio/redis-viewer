@@ -4,35 +4,41 @@ Simple browser-based admin for redis
 
 Notes
 -----
-I'm just using this as a development tool so there are a few caveats:
+Since this is intended to be a development tool there are a few caveats:
 
-* the default command is `KEYS *` which could cause performance issues if you have a lot of keys
-* there is no authentication yet so don't run it on a public server unless you're really really sure
+* the default command is `KEYS *` which could cause performance issues if you have a lot of keys (I'm working on an alternative)
 
 Pre-reqs
 -------------
-* socket.io
 * express
-* node_redis + hiredis (required?)
 * underscore
+* socket.io
+* node_redis + hiredis (required?)
 * connect-redis
 
 `npm install underscore express socket.io redis hiredis connect-redis`
 
 Installation
 ------------
-1. `git clone git://github.com/ikarosdaedalos/redis-viewer.git`
+1. `git clone git://github.com/FreeFlow/redis-viewer.git`
 2. `cd redis-viewer/`
 3. `node server.js`
 
 Features
 --------
 * view redis store keys and values - string, key, list, set, zset and hash currently supported
-* delete individual keys and values
+* delete individual keys and values on all data structures
 * execute arbitrary commands
-* formats JSON values (useful for express sessions)
+* formats JSON values in keys
+* command line options for ip, port and password (optional; for AUTH)
 
 TODO
 ----
-* add command options (ip:port)
-* add authentication support
+* keyboard navigation on values within keys and `x` for delete on key/value
+* add second MONITOR client and push changes to the clients current data view using websockets
+* hierarchical key organization for better performance with many keys
+* keyboard shortcut helpers
+* status responses should slide down
+* confirmation messages should slide down with enter/esc keyboard shortcuts
+* npm package to make installation/maintenance easier
+* editing keys/values

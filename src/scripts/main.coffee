@@ -11,6 +11,8 @@ $ ->
     'zset': _.template(document.getElementById('zset-template').innerHTML)
     'integer': _.template(document.getElementById('integer-template').innerHTML)
 
+  index = 0
+
   socket = new io.Socket(location.hostname)
   socket.connect()
 
@@ -19,11 +21,15 @@ $ ->
   subtitle_el = document.getElementById('subtitle')
   command_el = document.getElementById('command')
 
+  are_keys = true
+
   socket.on 'message', (message) ->
     title_el.innerHTML = message.title
     subtitle_el.innerHTML = message.reply_type
+    are_keys = if message.reply_type is 'keys' then true else false
 
     $results.append templates[message.reply_type](message)
+    $('ul#results > li .val').removeClass('active').eq(index).addClass('active')
     return
 
   parse_command = (href) ->
@@ -37,6 +43,7 @@ $ ->
     $results.empty()
     command = 'KEYS *' if not command
     location.hash = command
+    index = 0
     socket.send(command)
 
   $('a').live 'click', (e) ->
@@ -45,15 +52,41 @@ $ ->
     send_command command
     return
 
-  command_el.addEventListener 'keypress', (e) ->
+  command_el.addEventListener 'keyup', (e) ->
     return if e.keyCode isnt 13
-    send_command(e.target.value)
-    e.target.value = ''
+    send_command(command_el.value)
+    command_el.value = ''
     return
 
   document.addEventListener 'keyup', (e) ->
-    command_el.focus() if e.keyCode is 191
-    return
+    if document.activeElement.tagName.toLowerCase() isnt 'input'
+      switch e.keyCode
+        when 191 # /
+          command_el.focus()
+        when 73 # i
+          window.location.hash = '#INFO'
+          send_command parse_command location.href
+        when 74 # j
+          if are_keys
+            length = $('ul#results > li .val a').length
+            index++
+            index = length - 1 if index > length - 1
+            $('ul#results > li .val').removeClass('active').eq(index).addClass('active')
+        when 75 # k
+          if are_keys
+            index--
+            index = 0 if index < 0
+            $('ul#results > li .val').removeClass('active').eq(index).addClass('active')
+        when 81 # q
+          window.location.hash = '#KEYS *'
+          send_command parse_command location.href
+        when 79 # o
+          if are_keys
+            window.location.hash = $('ul#results > li .val a').eq(index).attr('href')
+            send_command parse_command location.href
+        when 82 # r
+          send_command parse_command location.href
+      return
   , false
   
   send_command parse_command location.href

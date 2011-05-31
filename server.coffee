@@ -1,18 +1,33 @@
+process.title = 'redis-viewer'
+
+argv = require('optimist').argv
+
+ip = argv.ip ? argv.i ? '127.0.0.1'
+port = argv.port ? argv.p ? 6379
+pass = argv.pass ? argv.x ? null
+
+console.log("observing #{ip}:#{port}")
+
 express = require('express')
 redis   = require('redis')
 io      = require('socket.io')
 _ = require('underscore')
 
 # redis.debug_mode = true
-redis_client = redis.createClient()
+redis_client = redis.createClient(port, ip)
+
+if pass?
+  redis_client.auth pass
 
 redis_client.on 'error', (error) ->
   console.log error
   return
 
 app = express.createServer()
-app.use(express.static(__dirname + '/public'))
 app.use(express.logger({ 'format': ':method :url' })) #'
+app.use(express.favicon())
+app.use(express.compiler(src: __dirname + '/src', dest: __dirname + '/public', enable: ['less', 'coffeescript']))
+app.use(express.static(__dirname + '/public'))
 
 app.listen(3000)
 console.log('listening on :3000')

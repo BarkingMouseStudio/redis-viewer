@@ -1,17 +1,21 @@
 {
   "name": "redis-viewer",
-  "description": "A simple admin interface for redis",
-  "version": "0.1.0",
+  "author": "Jim Fleming <jim@freeflow.io> (http://freeflow.io/)",
+  "url": "https://github.com/FreeFlow/redis-viewer"
+  "description": "A simple browser-based admin for redis",
+  "version": "0.5.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/ikarosdaedalos/redis-viewer.git"
+    "url": "git://github.com/FreeFlow/redis-viewer.git"
   },
-  "author": "Jim Fleming <jim@freeflow.io>",
-  "main": "server.js",
-  "directories": {
-    "lib": "."
-  },
-  "engines": {
-    "node": "*"
+  "dependencies": {
+    "coffee-script": "1.1"
+    "less": "1"
+    "express": "2"
+    "socket.io": "0.6"
+    "underscore": "1"
+    "optimist": "0.1"
+    "redis": "0.6"
+    "hiredis": "0.1"
   }
 }

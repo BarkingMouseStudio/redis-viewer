@@ -1,18 +1,33 @@
 (function() {
-  var app, express, io, key_command_map, redis, redis_client, reply_types, socket, _;
+  var app, argv, express, io, ip, key_command_map, pass, port, redis, redis_client, reply_types, socket, _, _ref, _ref2, _ref3, _ref4, _ref5, _ref6;
+  process.title = 'redis-viewer';
+  argv = require('optimist').argv;
+  ip = (_ref = (_ref2 = argv.ip) != null ? _ref2 : argv.i) != null ? _ref : '127.0.0.1';
+  port = (_ref3 = (_ref4 = argv.port) != null ? _ref4 : argv.p) != null ? _ref3 : 6379;
+  pass = (_ref5 = (_ref6 = argv.pass) != null ? _ref6 : argv.x) != null ? _ref5 : null;
+  console.log("observing " + ip + ":" + port);
   express = require('express');
   redis = require('redis');
   io = require('socket.io');
   _ = require('underscore');
-  redis_client = redis.createClient();
+  redis_client = redis.createClient(port, ip);
+  if (pass != null) {
+    redis_client.auth(pass);
+  }
   redis_client.on('error', function(error) {
     console.log(error);
   });
   app = express.createServer();
-  app.use(express.static(__dirname + '/public'));
   app.use(express.logger({
     'format': ':method :url'
   }));
+  app.use(express.favicon());
+  app.use(express.compiler({
+    src: __dirname + '/src',
+    dest: __dirname + '/public',
+    enable: ['less', 'coffeescript']
+  }));
+  app.use(express.static(__dirname + '/public'));
   app.listen(3000);
   console.log('listening on :3000');
   socket = io.listen(app);

@@ -8,11 +8,11 @@
   
   <link rel="stylesheet" type="text/css" href="styles.css" media="all" />
 
-  <script src="deps/underscore.js"></script>
-  <script src="deps/jquery.js"></script>
+  <script src="/scripts/dependencies/underscore.js"></script>
+  <script src="/scripts/dependencies/jquery.js"></script>
   <script src="socket.io/socket.io.js"></script>
 
-  <script src="main.js"></script>
+  <script src="/scripts/main.js"></script>
 
   <script type="text/template" id="key-template">
     <li>
@@ -86,7 +86,7 @@
 </head>
 <body>
   <header id="main-header">
-    <input type="text" id="command" placeholder="redis>" autofocus />
+    <input type="text" id="command" placeholder="redis>" />
     <h1><a href="http://redis.io/" title="redis.io" target="_blank"><img src="redis-logo.png" alt="redis.io" /></a></h1>
     <ul id="quick">
       <li><a href="#KEYS *">[KEYS *]</a></li>
