@@ -31,13 +31,12 @@ Features
 * execute arbitrary commands
 * formats JSON values in keys
 * command line options for ip, port and password (optional; for AUTH)
+* full keyboard arrow navigation and 'x' to delete, enter to expand
 
 TODO
 ----
-* keyboard navigation on values within keys and `x` for delete on key/value
 * add second MONITOR client and push changes to the clients current data view using websockets
 * hierarchical key organization for better performance with many keys
-* keyboard shortcut helpers
 * status responses should slide down
 * confirmation messages should slide down with enter/esc keyboard shortcuts
 * npm package to make installation/maintenance easier
