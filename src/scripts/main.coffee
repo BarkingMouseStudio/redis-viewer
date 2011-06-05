@@ -24,9 +24,10 @@ class PageView
       zset:    _.template(@getTpl('zset-template'))
       integer: _.template(@getTpl('integer-template'))
   
-  cmd_keyup: (evt) ->
+  cmd_keyup: (evt) =>
     if evt.keyCode == 13
-      $('#command').val('')
+      @goto(@command_el.val())
+      @command_el.val('').blur()
   
   goto: (hash) ->
     window.location.hash = hash
@@ -40,27 +41,31 @@ class PageView
     unless (@command_el.is(':focus'))
       switch evt.keyCode
         when 191 then @command_el.focus()
-        when 73 then @goto('#INFO')
+        when 73 then @goto('#INFO') 
         when 75, 81 then @goto('#KEYS *')
-        when 74, 38
+        when 74, 38 # Up arrow
           if @active.prev().length > 0
             @active = @active.removeClass('active').prev().addClass('active')
             @show_active()
             evt.preventDefault()
-        when 75, 40
+        when 75, 40 # Down Arrow
           if @active.next().length > 0
             @active = @active.removeClass('active').next().addClass('active')
             @show_active()
             evt.preventDefault()
-        when 79     then @goto(@active.find('a').attr('href'))
-        when 13, 39 then @goto(@active.find('a').attr('href'))
+        when 79     then @goto(@active.find('a').attr('href')) # Back Arrow
+        when 13, 39
+          link = @active.find('a').first()
+          return !@link_click() if link.is '.confirm'
+          @goto(link.attr('href')) # Enter / Next Arrow
         when 88
           if @active.find('a.confirm').length && @link_click()
             @goto(@active.find('a.confirm').attr('href'))
-        when 37 then socket.goback()
+        when 37 then socket.goback()     # left arrow
+        when 73 then @command_el.focus() # i
         
  
-  link_click: () ->
+  link_click: ->
     confirm('Are you sure you want to run this action?')
   
   clear_results: ->
@@ -74,7 +79,6 @@ class PageView
   
 class SocketHandler
   constructor: ->
-    @curhash = window.location.hash
     @socket = new io.Socket(location.hostname)
     @socket.connect()
     $(window).bind('hashchange', @on_hashchange)
@@ -90,8 +94,6 @@ class SocketHandler
     page.update_content(message.reply_type, message)
   
   on_hashchange: =>
-    @oldhash = @curhash
-    @curhash = window.location.hash
     @send_command(window.location.hash.substr(1)) if window.location.hash.length > 1
   
   send_command: (command) =>
@@ -104,8 +106,7 @@ class SocketHandler
     @send_command()
     
   goback: ->
-    window.location.hash = @oldhash
-    @curhash = @oldhash
+    window.history.go(-1)
   
   
 $ ->

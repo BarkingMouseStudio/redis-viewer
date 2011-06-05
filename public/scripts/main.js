@@ -5,7 +5,8 @@
     PageView.active = [];
     PageView.are_keys = true;
     function PageView() {
-      this.doc_key = __bind(this.doc_key, this);;      this.results = $('ul#results');
+      this.doc_key = __bind(this.doc_key, this);
+      this.cmd_keyup = __bind(this.cmd_keyup, this);      this.results = $('ul#results');
       $('a.confirm').live('click', this.link_click);
       this.command_el = $('#command');
       this.command_el.bind('keyup', this.cmd_keyup);
@@ -29,7 +30,8 @@
     };
     PageView.prototype.cmd_keyup = function(evt) {
       if (evt.keyCode === 13) {
-        return $('#command').val('');
+        this.goto(this.command_el.val());
+        return this.command_el.val('').blur();
       }
     };
     PageView.prototype.goto = function(hash) {
@@ -45,6 +47,7 @@
       }
     };
     PageView.prototype.doc_key = function(evt) {
+      var link;
       if (!(this.command_el.is(':focus'))) {
         switch (evt.keyCode) {
           case 191:
@@ -74,7 +77,11 @@
             return this.goto(this.active.find('a').attr('href'));
           case 13:
           case 39:
-            return this.goto(this.active.find('a').attr('href'));
+            link = this.active.find('a').first();
+            if (link.is('.confirm')) {
+              return !this.link_click();
+            }
+            return this.goto(link.attr('href'));
           case 88:
             if (this.active.find('a.confirm').length && this.link_click()) {
               return this.goto(this.active.find('a.confirm').attr('href'));
@@ -82,6 +89,8 @@
             break;
           case 37:
             return socket.goback();
+          case 73:
+            return this.command_el.focus();
         }
       }
     };
@@ -104,10 +113,9 @@
   })();
   SocketHandler = (function() {
     function SocketHandler() {
-      this.send_command = __bind(this.send_command, this);;
-      this.on_hashchange = __bind(this.on_hashchange, this);;
-      this.handle_message = __bind(this.handle_message, this);;      this.curhash = window.location.hash;
-      this.socket = new io.Socket(location.hostname);
+      this.send_command = __bind(this.send_command, this);
+      this.on_hashchange = __bind(this.on_hashchange, this);
+      this.handle_message = __bind(this.handle_message, this);      this.socket = new io.Socket(location.hostname);
       this.socket.connect();
       $(window).bind('hashchange', this.on_hashchange);
       this.socket.on('message', this.handle_message);
@@ -122,8 +130,6 @@
       return page.update_content(message.reply_type, message);
     };
     SocketHandler.prototype.on_hashchange = function() {
-      this.oldhash = this.curhash;
-      this.curhash = window.location.hash;
       if (window.location.hash.length > 1) {
         return this.send_command(window.location.hash.substr(1));
       }
@@ -139,8 +145,7 @@
       return this.send_command();
     };
     SocketHandler.prototype.goback = function() {
-      window.location.hash = this.oldhash;
-      return this.curhash = this.oldhash;
+      return window.history.go(-1);
     };
     return SocketHandler;
   })();

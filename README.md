@@ -15,8 +15,11 @@ Pre-reqs
 * socket.io
 * node_redis + hiredis (required?)
 * connect-redis
+* coffee-script
+* optimist
+* less
 
-`npm install underscore express socket.io redis hiredis connect-redis`
+`npm install underscore express socket.io redis hiredis connect-redis less coffee-script optimist`
 
 Installation
 ------------
