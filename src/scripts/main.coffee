@@ -9,20 +9,20 @@ class PageView
     @command_el.bind('keyup', @cmd_keyup)
     $(document).bind('keydown', @doc_key)
   
-  getTpl: (id) ->
+  get_tpl: (id) ->
     document.getElementById(id).innerHTML
   
   load_templates: () ->
     @templates =
-      keys:    _.template(@getTpl('key-template'))
-      bulk:    _.template(@getTpl('bulk-template'))
-      status:  _.template(@getTpl('status-template'))
-      error:   _.template(@getTpl('error-template'))
-      hash:    _.template(@getTpl('hash-template'))
-      list:    _.template(@getTpl('list-template'))
-      set:     _.template(@getTpl('set-template'))
-      zset:    _.template(@getTpl('zset-template'))
-      integer: _.template(@getTpl('integer-template'))
+      keys:    _.template(@get_tpl('key-template'))
+      bulk:    _.template(@get_tpl('bulk-template'))
+      status:  _.template(@get_tpl('status-template'))
+      error:   _.template(@get_tpl('error-template'))
+      hash:    _.template(@get_tpl('hash-template'))
+      list:    _.template(@get_tpl('list-template'))
+      set:     _.template(@get_tpl('set-template'))
+      zset:    _.template(@get_tpl('zset-template'))
+      integer: _.template(@get_tpl('integer-template'))
   
   cmd_keyup: (evt) =>
     if evt.keyCode == 13
@@ -40,30 +40,29 @@ class PageView
   doc_key: (evt) =>
     unless (@command_el.is(':focus'))
       switch evt.keyCode
-        when 191 then @command_el.focus()
-        when 73 then @goto('#INFO') 
-        when 75, 81 then @goto('#KEYS *')
-        when 74, 38 # Up arrow
+        when 191 then @command_el.focus() # /
+        when 73 then @goto('#INFO') # i 
+        when 81 then @goto('#KEYS *') # q
+        when 75, 38 # k / up arrow
           if @active.prev().length > 0
             @active = @active.removeClass('active').prev().addClass('active')
             @show_active()
             evt.preventDefault()
-        when 75, 40 # Down Arrow
+        when 74, 40 # j / down Arrow
           if @active.next().length > 0
             @active = @active.removeClass('active').next().addClass('active')
             @show_active()
             evt.preventDefault()
-        when 79     then @goto(@active.find('a').attr('href')) # Back Arrow
-        when 13, 39
+        when 79 then @goto(@active.find('a').attr('href')) # left arrow
+        when 13, 39 # enter / next arrow
           link = @active.find('a').first()
-          return !@link_click() if link.is '.confirm'
-          @goto(link.attr('href')) # Enter / Next Arrow
-        when 88
+          return !link_click() if link.is '.confirm'
+          @goto(link.attr('href'))
+        when 88 # x
           if @active.find('a.confirm').length && @link_click()
             @goto(@active.find('a.confirm').attr('href'))
-        when 37 then socket.goback()     # left arrow
+        when 37 then socket.goback() # left arrow
         when 73 then @command_el.focus() # i
-        
  
   link_click: ->
     confirm('Are you sure you want to run this action?')
@@ -96,10 +95,8 @@ class SocketHandler
   on_hashchange: =>
     @send_command(window.location.hash.substr(1)) if window.location.hash.length > 1
   
-  send_command: (command) =>
+  send_command: (command = 'KEYS *') =>
     page.clear_results()
-    if (!command)
-      command = 'KEYS *'
     return @socket.send(command)
     
   loaded: ->
@@ -107,7 +104,6 @@ class SocketHandler
     
   goback: ->
     window.history.go(-1)
-  
   
 $ ->
   window.page = page =     new PageView()

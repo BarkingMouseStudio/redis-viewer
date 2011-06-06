@@ -5,27 +5,27 @@
     PageView.active = [];
     PageView.are_keys = true;
     function PageView() {
-      this.doc_key = __bind(this.doc_key, this);
-      this.cmd_keyup = __bind(this.cmd_keyup, this);      this.results = $('ul#results');
+      this.doc_key = __bind(this.doc_key, this);;
+      this.cmd_keyup = __bind(this.cmd_keyup, this);;      this.results = $('ul#results');
       $('a.confirm').live('click', this.link_click);
       this.command_el = $('#command');
       this.command_el.bind('keyup', this.cmd_keyup);
       $(document).bind('keydown', this.doc_key);
     }
-    PageView.prototype.getTpl = function(id) {
+    PageView.prototype.get_template = function(id) {
       return document.getElementById(id).innerHTML;
     };
     PageView.prototype.load_templates = function() {
       return this.templates = {
-        keys: _.template(this.getTpl('key-template')),
-        bulk: _.template(this.getTpl('bulk-template')),
-        status: _.template(this.getTpl('status-template')),
-        error: _.template(this.getTpl('error-template')),
-        hash: _.template(this.getTpl('hash-template')),
-        list: _.template(this.getTpl('list-template')),
-        set: _.template(this.getTpl('set-template')),
-        zset: _.template(this.getTpl('zset-template')),
-        integer: _.template(this.getTpl('integer-template'))
+        keys: _.template(this.get_template('key-template')),
+        bulk: _.template(this.get_template('bulk-template')),
+        status: _.template(this.get_template('status-template')),
+        error: _.template(this.get_template('error-template')),
+        hash: _.template(this.get_template('hash-template')),
+        list: _.template(this.get_template('list-template')),
+        set: _.template(this.get_template('set-template')),
+        zset: _.template(this.get_template('zset-template')),
+        integer: _.template(this.get_template('integer-template'))
       };
     };
     PageView.prototype.cmd_keyup = function(evt) {
@@ -54,10 +54,9 @@
             return this.command_el.focus();
           case 73:
             return this.goto('#INFO');
-          case 75:
           case 81:
             return this.goto('#KEYS *');
-          case 74:
+          case 75:
           case 38:
             if (this.active.prev().length > 0) {
               this.active = this.active.removeClass('active').prev().addClass('active');
@@ -65,7 +64,7 @@
               return evt.preventDefault();
             }
             break;
-          case 75:
+          case 74:
           case 40:
             if (this.active.next().length > 0) {
               this.active = this.active.removeClass('active').next().addClass('active');
@@ -79,7 +78,7 @@
           case 39:
             link = this.active.find('a').first();
             if (link.is('.confirm')) {
-              return !this.link_click();
+              return !link_click();
             }
             return this.goto(link.attr('href'));
           case 88:
@@ -113,9 +112,9 @@
   })();
   SocketHandler = (function() {
     function SocketHandler() {
-      this.send_command = __bind(this.send_command, this);
-      this.on_hashchange = __bind(this.on_hashchange, this);
-      this.handle_message = __bind(this.handle_message, this);      this.socket = new io.Socket(location.hostname);
+      this.send_command = __bind(this.send_command, this);;
+      this.on_hashchange = __bind(this.on_hashchange, this);;
+      this.handle_message = __bind(this.handle_message, this);;      this.socket = new io.Socket(location.hostname);
       this.socket.connect();
       $(window).bind('hashchange', this.on_hashchange);
       this.socket.on('message', this.handle_message);
@@ -135,10 +134,10 @@
       }
     };
     SocketHandler.prototype.send_command = function(command) {
-      page.clear_results();
-      if (!command) {
+      if (command == null) {
         command = 'KEYS *';
       }
+      page.clear_results();
       return this.socket.send(command);
     };
     SocketHandler.prototype.loaded = function() {
