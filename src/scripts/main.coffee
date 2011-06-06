@@ -1,12 +1,17 @@
 class PageView
-  @active = []
   @are_keys: true
   
   constructor: ->
     @results = $('ul#results')
     $('a.confirm').live('click', @link_click)
+
+    @shortcuts = $('#shortcuts')
+    @shortcuts.find('a#close-shortcuts').bind 'click', =>
+      @toggle_shortcuts()
+
     @command_el = $('#command')
     @command_el.bind('keyup', @cmd_keyup)
+
     $(document).bind('keydown', @doc_key)
   
   get_tpl: (id) ->
@@ -36,9 +41,17 @@ class PageView
     if (@active.index() % 2 == 0)
       topheight = (@active.offset().top - (1/3)*$(window).height())
       $('body').stop().animate({scrollTop: topheight}, 600)
+
+  toggle_shortcuts: ->
+    @shortcuts.toggle()
     
   doc_key: (evt) =>
-    unless (@command_el.is(':focus'))
+    if not @command_el.is(':focus') and evt.shiftKey
+      switch evt.keyCode
+        when 191 then @toggle_shortcuts() # shift + /
+      return false
+
+    unless (@command_el.is(':focus')) or evt.shiftKey or evt.ctrlKey
       switch evt.keyCode
         when 191 then @command_el.focus() # /
         when 73 then @goto('#INFO') # i 
@@ -53,8 +66,7 @@ class PageView
             @active = @active.removeClass('active').next().addClass('active')
             @show_active()
             evt.preventDefault()
-        when 79 then @goto(@active.find('a').attr('href')) # left arrow
-        when 13, 39 # enter / next arrow
+        when 13, 39, 79 # enter / right arrow / o
           link = @active.find('a').first()
           return !link_click() if link.is '.confirm'
           @goto(link.attr('href'))
@@ -62,7 +74,7 @@ class PageView
           if @active.find('a.confirm').length && @link_click()
             @goto(@active.find('a.confirm').attr('href'))
         when 37 then socket.goback() # left arrow
-        when 73 then @command_el.focus() # i
+      return false
  
   link_click: ->
     confirm('Are you sure you want to run this action?')
@@ -97,7 +109,7 @@ class SocketHandler
   
   send_command: (command = 'KEYS *') =>
     page.clear_results()
-    return @socket.send(command)
+    @socket.send(command)
     
   loaded: ->
     @send_command()

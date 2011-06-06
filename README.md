@@ -34,7 +34,7 @@ Features
 * execute arbitrary commands
 * formats JSON values in keys
 * command line options for ip, port and password (optional; for AUTH)
-* full keyboard arrow navigation and 'x' to delete, enter to expand
+* full keyboard arrow navigation and `x` to delete, enter to expand (press `<shift> + /` or `?` for the full list)
 
 TODO
 ----

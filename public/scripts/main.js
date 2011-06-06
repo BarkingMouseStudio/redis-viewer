@@ -2,30 +2,33 @@
   var PageView, SocketHandler;
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
   PageView = (function() {
-    PageView.active = [];
     PageView.are_keys = true;
     function PageView() {
       this.doc_key = __bind(this.doc_key, this);;
       this.cmd_keyup = __bind(this.cmd_keyup, this);;      this.results = $('ul#results');
       $('a.confirm').live('click', this.link_click);
+      this.shortcuts = $('#shortcuts');
+      this.shortcuts.find('a#close-shortcuts').bind('click', __bind(function() {
+        return this.toggle_shortcuts();
+      }, this));
       this.command_el = $('#command');
       this.command_el.bind('keyup', this.cmd_keyup);
       $(document).bind('keydown', this.doc_key);
     }
-    PageView.prototype.get_template = function(id) {
+    PageView.prototype.get_tpl = function(id) {
       return document.getElementById(id).innerHTML;
     };
     PageView.prototype.load_templates = function() {
       return this.templates = {
-        keys: _.template(this.get_template('key-template')),
-        bulk: _.template(this.get_template('bulk-template')),
-        status: _.template(this.get_template('status-template')),
-        error: _.template(this.get_template('error-template')),
-        hash: _.template(this.get_template('hash-template')),
-        list: _.template(this.get_template('list-template')),
-        set: _.template(this.get_template('set-template')),
-        zset: _.template(this.get_template('zset-template')),
-        integer: _.template(this.get_template('integer-template'))
+        keys: _.template(this.get_tpl('key-template')),
+        bulk: _.template(this.get_tpl('bulk-template')),
+        status: _.template(this.get_tpl('status-template')),
+        error: _.template(this.get_tpl('error-template')),
+        hash: _.template(this.get_tpl('hash-template')),
+        list: _.template(this.get_tpl('list-template')),
+        set: _.template(this.get_tpl('set-template')),
+        zset: _.template(this.get_tpl('zset-template')),
+        integer: _.template(this.get_tpl('integer-template'))
       };
     };
     PageView.prototype.cmd_keyup = function(evt) {
@@ -46,22 +49,35 @@
         }, 600);
       }
     };
+    PageView.prototype.toggle_shortcuts = function() {
+      return this.shortcuts.toggle();
+    };
     PageView.prototype.doc_key = function(evt) {
       var link;
-      if (!(this.command_el.is(':focus'))) {
+      if (!this.command_el.is(':focus') && evt.shiftKey) {
         switch (evt.keyCode) {
           case 191:
-            return this.command_el.focus();
+            this.toggle_shortcuts();
+        }
+        return false;
+      }
+      if (!((this.command_el.is(':focus')) || evt.shiftKey || evt.ctrlKey)) {
+        switch (evt.keyCode) {
+          case 191:
+            this.command_el.focus();
+            break;
           case 73:
-            return this.goto('#INFO');
+            this.goto('#INFO');
+            break;
           case 81:
-            return this.goto('#KEYS *');
+            this.goto('#KEYS *');
+            break;
           case 75:
           case 38:
             if (this.active.prev().length > 0) {
               this.active = this.active.removeClass('active').prev().addClass('active');
               this.show_active();
-              return evt.preventDefault();
+              evt.preventDefault();
             }
             break;
           case 74:
@@ -69,28 +85,27 @@
             if (this.active.next().length > 0) {
               this.active = this.active.removeClass('active').next().addClass('active');
               this.show_active();
-              return evt.preventDefault();
+              evt.preventDefault();
             }
             break;
-          case 79:
-            return this.goto(this.active.find('a').attr('href'));
           case 13:
           case 39:
+          case 79:
             link = this.active.find('a').first();
             if (link.is('.confirm')) {
               return !link_click();
             }
-            return this.goto(link.attr('href'));
+            this.goto(link.attr('href'));
+            break;
           case 88:
             if (this.active.find('a.confirm').length && this.link_click()) {
-              return this.goto(this.active.find('a.confirm').attr('href'));
+              this.goto(this.active.find('a.confirm').attr('href'));
             }
             break;
           case 37:
-            return socket.goback();
-          case 73:
-            return this.command_el.focus();
+            socket.goback();
         }
+        return false;
       }
     };
     PageView.prototype.link_click = function() {

@@ -8,12 +8,17 @@ a {
   color: #06a;
   text-decoration: none;
   text-shadow: 1px 1px 0 #f0f0f0;
-}
-a:hover {
-  color: #09f;
+
+  &:hover {
+    color: #09f;
+  }
 }
 ul {
   list-style: none;
+  margin: 0;
+  padding: 0;
+}
+dl, dt, dd {
   margin: 0;
   padding: 0;
 }
@@ -83,7 +88,7 @@ pre.val, div.val {
   padding: 11px 0 0;
   font-weight: bold;
 }
-.key {
+ul#results .key {
   font-weight: bold;
   float: left;
   margin: 0 10px 0 0;
@@ -109,4 +114,44 @@ ul#quick > li a {
   text-shadow: 1px 1px 0 #666;
   color: #fff;
 }
+#shortcuts {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 440px;
+  height: 240px;
+  margin: -140px 0 0 -260px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.9);
+  padding: 20px 40px;
+  border-radius: 10px;
 
+  strong.key {
+    color: #09f;
+  }
+
+  h3 {
+    color: #fff;
+  }
+
+  a#close-shortcuts {
+    text-shadow: none;
+    text-decoration: underline;
+    float: right;
+  }
+
+  dl {
+    dt {
+      clear: left;
+      float: left;
+      width: 35%;
+      margin: 0 0 10px;
+    }
+    dd {
+      float: left;
+      margin: 0 0 10px 10%;
+      width: 55%;
+    }
+  }
+}
