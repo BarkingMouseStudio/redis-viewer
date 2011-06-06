@@ -1,113 +1,158 @@
 (function() {
-  $(function() {
-    var $results, are_keys, command_el, index, parse_command, send_command, socket, subtitle_el, templates, title_el;
-    templates = {
-      'keys': _.template(document.getElementById('key-template').innerHTML),
-      'bulk': _.template(document.getElementById('bulk-template').innerHTML),
-      'status': _.template(document.getElementById('status-template').innerHTML),
-      'error': _.template(document.getElementById('error-template').innerHTML),
-      'hash': _.template(document.getElementById('hash-template').innerHTML),
-      'list': _.template(document.getElementById('list-template').innerHTML),
-      'set': _.template(document.getElementById('set-template').innerHTML),
-      'zset': _.template(document.getElementById('zset-template').innerHTML),
-      'integer': _.template(document.getElementById('integer-template').innerHTML)
+  var PageView, SocketHandler;
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  PageView = (function() {
+    PageView.active = [];
+    PageView.are_keys = true;
+    function PageView() {
+      this.doc_key = __bind(this.doc_key, this);
+      this.cmd_keyup = __bind(this.cmd_keyup, this);      this.results = $('ul#results');
+      $('a.confirm').live('click', this.link_click);
+      this.command_el = $('#command');
+      this.command_el.bind('keyup', this.cmd_keyup);
+      $(document).bind('keydown', this.doc_key);
+    }
+    PageView.prototype.getTpl = function(id) {
+      return document.getElementById(id).innerHTML;
     };
-    index = 0;
-    socket = new io.Socket(location.hostname);
-    socket.connect();
-    $results = $('ul#results');
-    title_el = document.getElementById('title');
-    subtitle_el = document.getElementById('subtitle');
-    command_el = document.getElementById('command');
-    are_keys = true;
-    socket.on('message', function(message) {
-      title_el.innerHTML = message.title;
-      subtitle_el.innerHTML = message.reply_type;
-      are_keys = message.reply_type === 'keys' ? true : false;
-      $results.append(templates[message.reply_type](message));
-      $('ul#results > li .val').removeClass('active').eq(index).addClass('active');
-    });
-    parse_command = function(href) {
-      var hash, hash_index;
-      hash_index = href.indexOf('#');
-      if (hash_index === -1) {
-        return null;
-      }
-      hash = href.substr(hash_index + 1);
-      if (hash.length === 0) {
-        return null;
-      }
-      return hash;
+    PageView.prototype.load_templates = function() {
+      return this.templates = {
+        keys: _.template(this.getTpl('key-template')),
+        bulk: _.template(this.getTpl('bulk-template')),
+        status: _.template(this.getTpl('status-template')),
+        error: _.template(this.getTpl('error-template')),
+        hash: _.template(this.getTpl('hash-template')),
+        list: _.template(this.getTpl('list-template')),
+        set: _.template(this.getTpl('set-template')),
+        zset: _.template(this.getTpl('zset-template')),
+        integer: _.template(this.getTpl('integer-template'))
+      };
     };
-    send_command = function(command) {
-      $results.empty();
-      if (!command) {
-        command = 'KEYS *';
+    PageView.prototype.cmd_keyup = function(evt) {
+      if (evt.keyCode === 13) {
+        this.goto(this.command_el.val());
+        return this.command_el.val('').blur();
       }
-      location.hash = command;
-      index = 0;
-      return socket.send(command);
     };
-    $('a').live('click', function(e) {
-      var command;
-      command = parse_command(e.target.href);
-      if (e.target.className === 'confirm' && !confirm("Are you sure you want to run this command?\n\n" + command)) {
-        return false;
+    PageView.prototype.goto = function(hash) {
+      return window.location.hash = hash;
+    };
+    PageView.prototype.show_active = function() {
+      var topheight;
+      if (this.active.index() % 2 === 0) {
+        topheight = this.active.offset().top - (1 / 3) * $(window).height();
+        return $('body').stop().animate({
+          scrollTop: topheight
+        }, 600);
       }
-      send_command(command);
-    });
-    command_el.addEventListener('keyup', function(e) {
-      if (e.keyCode !== 13) {
-        return;
-      }
-      send_command(command_el.value);
-      command_el.value = '';
-    });
-    document.addEventListener('keyup', function(e) {
-      var length;
-      if (document.activeElement.tagName.toLowerCase() !== 'input') {
-        switch (e.keyCode) {
+    };
+    PageView.prototype.doc_key = function(evt) {
+      var link;
+      if (!(this.command_el.is(':focus'))) {
+        switch (evt.keyCode) {
           case 191:
-            command_el.focus();
-            break;
+            return this.command_el.focus();
           case 73:
-            window.location.hash = '#INFO';
-            send_command(parse_command(location.href));
-            break;
+            return this.goto('#INFO');
+          case 75:
+          case 81:
+            return this.goto('#KEYS *');
           case 74:
-            if (are_keys) {
-              length = $('ul#results > li .val a').length;
-              index++;
-              if (index > length - 1) {
-                index = length - 1;
-              }
-              $('ul#results > li .val').removeClass('active').eq(index).addClass('active');
+          case 38:
+            if (this.active.prev().length > 0) {
+              this.active = this.active.removeClass('active').prev().addClass('active');
+              this.show_active();
+              return evt.preventDefault();
             }
             break;
           case 75:
-            if (are_keys) {
-              index--;
-              if (index < 0) {
-                index = 0;
-              }
-              $('ul#results > li .val').removeClass('active').eq(index).addClass('active');
+          case 40:
+            if (this.active.next().length > 0) {
+              this.active = this.active.removeClass('active').next().addClass('active');
+              this.show_active();
+              return evt.preventDefault();
             }
-            break;
-          case 81:
-            window.location.hash = '#KEYS *';
-            send_command(parse_command(location.href));
             break;
           case 79:
-            if (are_keys) {
-              window.location.hash = $('ul#results > li .val a').eq(index).attr('href');
-              send_command(parse_command(location.href));
+            return this.goto(this.active.find('a').attr('href'));
+          case 13:
+          case 39:
+            link = this.active.find('a').first();
+            if (link.is('.confirm')) {
+              return !this.link_click();
+            }
+            return this.goto(link.attr('href'));
+          case 88:
+            if (this.active.find('a.confirm').length && this.link_click()) {
+              return this.goto(this.active.find('a.confirm').attr('href'));
             }
             break;
-          case 82:
-            send_command(parse_command(location.href));
+          case 37:
+            return socket.goback();
+          case 73:
+            return this.command_el.focus();
         }
       }
-    }, false);
-    return send_command(parse_command(location.href));
+    };
+    PageView.prototype.link_click = function() {
+      return confirm('Are you sure you want to run this action?');
+    };
+    PageView.prototype.clear_results = function() {
+      return this.results.empty();
+    };
+    PageView.prototype.update_content = function(type, message) {
+      if (this.templates == null) {
+        this.load_templates();
+      }
+      this.results.append(this.templates[type](message));
+      if (this.results.has('.active').length === 0) {
+        return this.active = this.results.find('li:first-child').addClass('active');
+      }
+    };
+    return PageView;
+  })();
+  SocketHandler = (function() {
+    function SocketHandler() {
+      this.send_command = __bind(this.send_command, this);
+      this.on_hashchange = __bind(this.on_hashchange, this);
+      this.handle_message = __bind(this.handle_message, this);      this.socket = new io.Socket(location.hostname);
+      this.socket.connect();
+      $(window).bind('hashchange', this.on_hashchange);
+      this.socket.on('message', this.handle_message);
+    }
+    SocketHandler.prototype.update = function(id, html) {
+      return document.getElementById(id).innerHTML = html;
+    };
+    SocketHandler.prototype.handle_message = function(message) {
+      this.update('title', message.title);
+      this.update('subtitle', message.reply_type);
+      page.are_keys = !!(message.reply_type === 'keys');
+      return page.update_content(message.reply_type, message);
+    };
+    SocketHandler.prototype.on_hashchange = function() {
+      if (window.location.hash.length > 1) {
+        return this.send_command(window.location.hash.substr(1));
+      }
+    };
+    SocketHandler.prototype.send_command = function(command) {
+      page.clear_results();
+      if (!command) {
+        command = 'KEYS *';
+      }
+      return this.socket.send(command);
+    };
+    SocketHandler.prototype.loaded = function() {
+      return this.send_command();
+    };
+    SocketHandler.prototype.goback = function() {
+      return window.history.go(-1);
+    };
+    return SocketHandler;
+  })();
+  $(function() {
+    var page, socket;
+    window.page = page = new PageView();
+    window.socket = socket = new SocketHandler();
+    return socket.loaded();
   });
 }).call(this);
