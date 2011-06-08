@@ -73,7 +73,7 @@ class PageView
         when 88 # x
           if @active.find('a.confirm').length && @link_click()
             @goto(@active.find('a.confirm').attr('href'))
-        when 37 then socket.goback() # left arrow
+        when 37 then socket.go_back() # left arrow
       return false
  
   link_click: ->
