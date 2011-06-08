@@ -19,18 +19,18 @@ class PageView
   
   load_templates: () ->
     @templates =
-      keys:    _.template(@get_tpl('key-template'))
-      bulk:    _.template(@get_tpl('bulk-template'))
-      status:  _.template(@get_tpl('status-template'))
-      error:   _.template(@get_tpl('error-template'))
-      hash:    _.template(@get_tpl('hash-template'))
-      list:    _.template(@get_tpl('list-template'))
-      set:     _.template(@get_tpl('set-template'))
-      zset:    _.template(@get_tpl('zset-template'))
+      keys: _.template(@get_tpl('key-template'))
+      bulk: _.template(@get_tpl('bulk-template'))
+      status: _.template(@get_tpl('status-template'))
+      error: _.template(@get_tpl('error-template'))
+      hash: _.template(@get_tpl('hash-template'))
+      list: _.template(@get_tpl('list-template'))
+      set: _.template(@get_tpl('set-template'))
+      zset: _.template(@get_tpl('zset-template'))
       integer: _.template(@get_tpl('integer-template'))
   
   cmd_keyup: (evt) =>
-    if evt.keyCode == 13
+    if evt.keyCode is 13
       @goto(@command_el.val())
       @command_el.val('').blur()
   
@@ -38,9 +38,9 @@ class PageView
     window.location.hash = hash
     
   show_active: ->
-    if (@active.index() % 2 == 0)
+    if @active.index() % 2 is 0
       topheight = (@active.offset().top - (1/3)*$(window).height())
-      $('body').stop().animate({scrollTop: topheight}, 600)
+      $('body').stop().animate({ scrollTop: topheight }, 600)
 
   toggle_shortcuts: ->
     @shortcuts.toggle()
@@ -112,12 +112,14 @@ class SocketHandler
     @socket.send(command)
     
   loaded: ->
-    @send_command()
+    hash = window.location.hash.substring(1)
+    hash = null unless hash.length > 0
+    @send_command(hash)
     
-  goback: ->
+  go_back: ->
     window.history.go(-1)
   
 $ ->
-  window.page = page =     new PageView()
+  window.page = page = new PageView()
   window.socket = socket = new SocketHandler()
   socket.loaded()

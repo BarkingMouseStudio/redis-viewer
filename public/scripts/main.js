@@ -156,9 +156,14 @@
       return this.socket.send(command);
     };
     SocketHandler.prototype.loaded = function() {
-      return this.send_command();
+      var hash;
+      hash = window.location.hash.substring(1);
+      if (!(hash.length > 0)) {
+        hash = null;
+      }
+      return this.send_command(hash);
     };
-    SocketHandler.prototype.goback = function() {
+    SocketHandler.prototype.go_back = function() {
       return window.history.go(-1);
     };
     return SocketHandler;
