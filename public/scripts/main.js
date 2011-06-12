@@ -103,7 +103,7 @@
             }
             break;
           case 37:
-            socket.goback();
+            socket.go_back();
         }
         return false;
       }
