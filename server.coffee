@@ -206,6 +206,7 @@ socket.on 'connection', (client) ->
         rows = []
         _.each reply, (val, key) ->
           try
+            val = val.replace(/</g, '&lt;').replace(/>/g, '&gt;')
             val = JSON.stringify(JSON.parse(val), null, 2)
           rows.push({ index: key, val: val })
           return
@@ -213,6 +214,7 @@ socket.on 'connection', (client) ->
       else
         if reply?
           try # attempt to parse bulk values containing JSON
+            reply = reply.replace(/</g, '&lt;').replace(/>/g, '&gt;')
             reply = JSON.stringify(JSON.parse(reply), null, 2)
         else
           reply = '(nil)'

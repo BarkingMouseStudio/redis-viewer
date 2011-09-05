@@ -4,8 +4,8 @@
   PageView = (function() {
     PageView.are_keys = true;
     function PageView() {
-      this.doc_key = __bind(this.doc_key, this);;
-      this.cmd_keyup = __bind(this.cmd_keyup, this);;      this.results = $('ul#results');
+      this.doc_key = __bind(this.doc_key, this);
+      this.cmd_keyup = __bind(this.cmd_keyup, this);      this.results = $('ul#results');
       $('a.confirm').live('click', this.link_click);
       this.shortcuts = $('#shortcuts');
       this.shortcuts.find('a#close-shortcuts').bind('click', __bind(function() {
@@ -127,9 +127,9 @@
   })();
   SocketHandler = (function() {
     function SocketHandler() {
-      this.send_command = __bind(this.send_command, this);;
-      this.on_hashchange = __bind(this.on_hashchange, this);;
-      this.handle_message = __bind(this.handle_message, this);;      this.socket = new io.Socket(location.hostname);
+      this.send_command = __bind(this.send_command, this);
+      this.on_hashchange = __bind(this.on_hashchange, this);
+      this.handle_message = __bind(this.handle_message, this);      this.socket = new io.Socket(location.hostname);
       this.socket.connect();
       $(window).bind('hashchange', this.on_hashchange);
       this.socket.on('message', this.handle_message);
