@@ -12,7 +12,7 @@
     "coffee-script": "1.1",
     "less": "1",
     "express": "2",
-    "socket.io": "0.6",
+    "socket.io": "2.3",
     "underscore": "1",
     "optimist": "0.1",
     "redis": "0.6",
